@@ -1,6 +1,8 @@
-=============================================
-indic-tokenizer: Tokenizer for Indian Scripts
-=============================================
+================
+indic-tokenizer
+================
+
+Tokenizer for Indian Scripts
 
 How to use ??
 =============
