@@ -196,6 +196,8 @@ class tokenizer():
         text = re.sub(r'(DOT)(\1*)MULTI', lambda m: r'.%s' %('.'*(len(m.group(2))/3)), text)
         text = re.sub(r'(PNVM)(\1*)MULTI', lambda m: u'\u0964%s' %(u'\u0964'*(len(m.group(2))/4)), text)
         text = re.sub(r'(DGVM)(\1*)MULTI', lambda m: u'\u0965%s' %(u'\u0965'*(len(m.group(2))/4)), text)
+
+	text = re.sub(u' ([!.?\u0964\u0965]) ', r' \1\n', text)
         
         return text
 
@@ -222,8 +224,8 @@ if __name__ == '__main__':
                                     description="Tokenizer for Indian Scripts",
                                     formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('--i', metavar='input', dest="INFILE", type=argparse.FileType('r'), default=sys.stdin, help="<input-file>")
-    parser.add_argument('--o', metavar='output', dest="OUTFILE", type=argparse.FileType('w'), default=sys.stdout, help="<output-file>")
     parser.add_argument('--l', metavar='language', dest="lang", choices=languages, default='hin', help=lang_help)
+    parser.add_argument('--o', metavar='output', dest="OUTFILE", type=argparse.FileType('w'), default=sys.stdout, help="<output-file>")
     args = parser.parse_args()
 
     # initialize convertor object
