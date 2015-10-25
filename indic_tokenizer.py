@@ -197,6 +197,7 @@ class tokenizer():
         text = re.sub(r'(PNVM)(\1*)MULTI', lambda m: u'\u0964%s' %(u'\u0964'*(len(m.group(2))/4)), text)
         text = re.sub(r'(DGVM)(\1*)MULTI', lambda m: u'\u0965%s' %(u'\u0965'*(len(m.group(2))/4)), text)
 
+	#split sentences
 	text = re.sub(u' ([!.?\u0964\u0965]) ', r' \1\n', text)
         
         return text

@@ -86,6 +86,9 @@ class tokenizer():
         text = ' '.join(text.split())
         #restore multi-dots
         text = re.sub(r'(DOT)(\1*)MULTI', lambda m: r'.%s' %('.'*(len(m.group(2))/3)), text)
+
+	#split sentences
+        text = re.sub(u' ([!.?]) ', r' \1\n', text)
         
         return text
 
