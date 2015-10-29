@@ -59,7 +59,6 @@ class tokenizer():
         text = re.sub(u"([a-zA-Z\u0080-\u024f])(['\u2019])([a-zA-Z\u0080-\u024f])", r"\1 \2\3", text)
         text = re.sub(u"([0-9])(['\u2019])s", r"\1 \2s", text)
         text = text.replace("''", " ' ' ")
-	print text
 
         #handle non-breaking prefixes
         words = text.split()
