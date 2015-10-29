@@ -14,6 +14,7 @@ How to use ??
     --i input     <input-file>
     --l language  select language (3 letter ISO-639 code)
 		    Hindi       : hin
+		    Urdu        : urd
 		    Telugu      : tel
 		    Tamil       : tam
 		    Malayalam   : mal
