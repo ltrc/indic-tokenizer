@@ -87,7 +87,8 @@ class tokenizer():
         text = re.sub(r'(DOT)(\1*)MULTI', lambda m: r'.%s' %('.'*(len(m.group(2))/3)), text)
 
 	#split sentences
-        text = re.sub(u' ([!.?]) ([a-zA-Z])', r' \1\n\2', text)
+        text = re.sub(u' ([!.?]) ([A-Z\u201c\u2018])', r' \1\n\2', text)
+        text = re.sub(u' ([!.?]) ([\'") ([A-Z])', r' \1\n\2 \3', text)
 	text = re.sub(u' ([!.?]) ([\)\}\]\'"\u2019\u201d>]) ', r' \1 \2\n', text)
         #text = re.sub(u' ([!.?]) ([^a-zA-Z]) ', r' \1 \2\n', text)
         

@@ -259,11 +259,11 @@ class tokenizer():
 
 	#split sentences
 	if self.urd: 
-	    text = re.sub(u' ([!.?\u06d4]) ([\u0617-\u061a\u0620-\u065f\u066e-\u06d3\u06d5\u06fa-\u06ffa-zA-Z])', r' \1\n\2', text)
+	    text = re.sub(u' ([!.?\u06d4]) ([\u0617-\u061a\u0620-\u065f\u066e-\u06d3\u06d5\u06fa-\u06ff\u201d\u2019A-Z])', r' \1\n\2', text)
 	    text = re.sub(u' ([!.?\u06d4]) ([\(\{\[\'"\u2018\u201c<]) ', r' \1 \2\n', text)
 	    #text = re.sub(u' ([!.?\u06d4]) ([^\u0617-\u061a\u0620-\u065f\u066e-\u06d3\u06d5\u06fa-\u06ffa-zA-Z]) ', r' \1 \2\n', text)
 	else: 
-	    text = re.sub(u' ([!.?\u0964\u0965]) ([\u0900-\u0d7fa-zA-Z])', r' \1\n\2', text)
+	    text = re.sub(u' ([!.?\u0964\u0965]) ([\u0900-\u0d7f\u201c\u2018A-Z])', r' \1\n\2', text)
 	    text = re.sub(u' ([!.?\u0964\u0965]) ([\)\}\]\'"\u2019\u201d>]) ', r' \1 \2\n', text)
 	    #text = re.sub(u' ([!.?\u0964\u0965]) ([^\u0900-\u0d7fa-zA-Z]) ', r' \1 \2\n', text)
         
