@@ -22,42 +22,87 @@ class tokenizer():
         with open('%s/NONBREAKING_PREFIXES' %file_path) as fp:
             self.NBP = dict()
             for line in fp:
-                if not line.startswith('#'):
-                    if '#NUMERIC_ONLY#' in line:
-                        self.NBP[line.replace('#NUMERIC_ONLY#', '').split()[0]] = 2
-                    else:
-                        self.NBP[line.strip()] = 1
+                if line.startswith('#'): continue
+                if '#NUMERIC_ONLY#' in line:
+                    self.NBP[line.replace('#NUMERIC_ONLY#', '').split()[0]] = 2
+                else:
+                    self.NBP[line.strip()] = 1
+
+        #precompile regexes
+        self.compile_regexes()
+
+    def compile_regexes(self):
+        # junk characters
+        self.junk = re.compile('[\x00-\x1f]')
+        # Latin-1 supplementary characters
+        self.latin = re.compile(u'([\xa1-\xbf\xd7\xf7])')
+        # general unicode punctituations except "’"
+        self.upunct = re.compile(u'([\u2000-\u2018\u201a-\u206f])')
+        # unicode mathematical operators
+        self.umathop = re.compile(u'([\u2200-\u22ff])')
+        # unicode fractions
+        self.ufrac = re.compile(u'([\u2150-\u2160])')
+        # unicode superscripts and subscripts
+        self.usupsub = re.compile(u'([\u2070-\u209f])')
+        # unicode currency symbols
+        self.ucurrency = re.compile(u'([\u20a0-\u20cf])')
+        # all "other" ASCII special characters
+        self.specascii = re.compile(u"([^\u0080-\U0010ffffa-zA-Z0-9\s\.'`,-])")
+
+        #keep multiple dots together
+        self.multidot = re.compile(r'(\.\.+)([^\.])')
+        #seperate "," outside 
+        self.notanumc = re.compile(r'([^0-9]),')
+        self.cnotanum = re.compile(r',([^0-9])')
+        #split contractions right (both "'" and "’")
+        self.numcs = re.compile(u"([0-9])(['\u2019])s")
+        self.aca = re.compile(u"([a-zA-Z\u0080-\u024f])(['\u2019])([a-zA-Z\u0080-\u024f])")
+        self.acna = re.compile(u"([a-zA-Z\u0080-\u024f])(['\u2019])([^a-zA-Z\u0080-\u024f])")
+        self.nacna = re.compile(u"([^a-zA-Z\u0080-\u024f])(['\u2019])([^a-zA-Z\u0080-\u024f])")
+        self.naca = re.compile(u"([^a-zA-Z0-9\u0080-\u024f])(['\u2019])([a-zA-Z\u0080-\u024f])")
+
+	#multiple hyphens
+        self.multihyphen = re.compile('(-+)')
+        self.hypheninnun = re.compile(r'(-?[0-9]-+[0-9]-?){,}')
+        #restore multi-dots
+        self.restoredots = re.compile(r'(DOT)(\1*)MULTI')
+
+        #split sentences
+        self.splitsenr1 = re.compile(u' ([!.?]) ([A-Z])')
+        self.splitsenr2 = re.compile(u' ([!.?]) ([\u201c\u2018 ]+ [A-Z])')
+        self.splitsenr3 = re.compile(u' ([!.?]) ([\'" ]+) ([A-Z])')
+        self.splitsenr4 = re.compile(u' ([!.?]) ([\'"\)\}\]\u2019\u201d> ]+) ([A-Z])')
 
     def tokenize(self, text):
         text = ' %s ' %' '.join(text.split())
         # remove junk characters
-        text = re.sub('[\x00-\x1f]', '', text)
+        text = self.junk.sub('', text)
         # seperate out on Latin-1 supplementary characters
-        text = re.sub(u'([\xa1-\xbf\xd7\xf7])', r' \1 ', text)        
+        text = self.latin.sub(r' \1 ', text)        
         # seperate out on general unicode punctituations except "’"
-        text = re.sub(u'([\u2000-\u2018\u201a-\u206f])', r' \1 ', text)        
+        text = self.upunct.sub(r' \1 ', text)        
         # seperate out on unicode mathematical operators
-        text = re.sub(u'([\u2200-\u22ff])', r' \1 ', text)        
+        text = self.umathop.sub(r' \1 ', text)        
         # seperate out on unicode fractions
-        text = re.sub(u'([\u2150-\u2160])', r' \1 ', text)        
+        text = self.ufrac.sub(r' \1 ', text)        
         # seperate out on unicode superscripts and subscripts
-        text = re.sub(u'([\u2070-\u209f])', r' \1 ', text)        
+        text = self.usupsub.sub(r' \1 ', text)        
         # seperate out on unicode currency symbols
-        text = re.sub(u'([\u20a0-\u20cf])', r' \1 ', text)        
-        # seperate out all "other" special characters
-        text = re.sub(u"([^\u0080-\U0010ffffa-zA-Z0-9\s\.'`,-])", r' \1 ', text)        
+        text = self.ucurrency.sub(r' \1 ', text)        
+        # seperate out all "other" ASCII special characters
+        text = self.specascii.sub(r' \1 ', text)        
 
         #keep multiple dots together
-        text = re.sub(r'(\.\.+)([^\.])', lambda m: r' %sMULTI %s' %('DOT'*len(m.group(1)), m.group(2)), text)
+        text = self.multidot.sub(lambda m: r' %sMULTI %s' %('DOT'*len(m.group(1)), m.group(2)), text)
         #seperate "," outside 
-        text = re.sub(r'([^0-9]),', r'\1 , ', text)
-        text = re.sub(r',([^0-9])', r' , \1', text)
+        text = self.notanumc.sub(r'\1 , ', text)
+        text = self.cnotanum.sub(r' , \1', text)
         #split contractions right (both "'" and "’")
-        text = re.sub(u"([^a-zA-Z\u0080-\u024f])(['\u2019])([^a-zA-Z\u0080-\u024f])", r"\1 \2 \3", text)
-        text = re.sub(u"([^a-zA-Z0-9\u0080-\u024f])(['\u2019])([a-zA-Z\u0080-\u024f])", r"\1 \2 \3", text)
-        text = re.sub(u"([a-zA-Z\u0080-\u024f])(['\u2019])([^a-zA-Z\u0080-\u024f])", r"\1 \2 \3", text)
-        text = re.sub(u"([a-zA-Z\u0080-\u024f])(['\u2019])([a-zA-Z\u0080-\u024f])", r"\1 \2\3", text)
-        text = re.sub(u"([0-9])(['\u2019])s", r"\1 \2s", text)
+        text = self.nacna.sub(r"\1 \2 \3", text)
+        text = self.naca.sub(r"\1 \2 \3", text)
+        text = self.acna.sub(r"\1 \2 \3", text)
+        text = self.aca.sub(r"\1 \2\3", text)
+        text = self.numcs.sub(r"\1 \2s", text)
         text = text.replace("''", " ' ' ")
 
         #handle non-breaking prefixes
@@ -80,17 +125,18 @@ class tokenizer():
                 else: word = dotless + ' .'
             text += "%s " %word
       
-	text = re.sub('(-+)', lambda m: r'%s' %(' '.join('-'*len(m.group(1)))), text) 
-        text = re.sub(r'(-?[0-9]-+[0-9]-?){,}',lambda m: r'%s' %(m.group().replace('-', ' - ')), text)
+	#seperate out hyphens
+	text = self.multihyphen.sub(lambda m: r'%s' %(' '.join('-'*len(m.group(1)))), text) 
+        text = self.hypheninnun.sub(lambda m: r'%s' %(m.group().replace('-', ' - ')), text)
         text = ' '.join(text.split())
         #restore multi-dots
-        text = re.sub(r'(DOT)(\1*)MULTI', lambda m: r'.%s' %('.'*(len(m.group(2))/3)), text)
+        text = self.restoredots.sub(lambda m: r'.%s' %('.'*(len(m.group(2))/3)), text)
 
 	#split sentences
-        text = re.sub(u' ([!.?]) ([A-Z\u201c\u2018])', r' \1\n\2', text)
-        text = re.sub(u' ([!.?]) ([\'"]) ([A-Z])', r' \1\n\2 \3', text)
-	text = re.sub(u' ([!.?]) ([\)\}\]\'"\u2019\u201d>]) ', r' \1 \2\n', text)
-        #text = re.sub(u' ([!.?]) ([^a-zA-Z]) ', r' \1 \2\n', text)
+        text = self.splitsenr1.sub(r' \1\n\2', text)
+        text = self.splitsenr2.sub(r' \1\n\2', text)
+        text = self.splitsenr3.sub(r' \1\n\2 \3', text)
+	text = self.splitsenr4.sub(r' \1 \2\n\3', text)
         
         return text
 

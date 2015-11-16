@@ -2,7 +2,7 @@
 indic-tokenizer
 ================
 
-Tokenizer for Indian Scripts
+Tokenizer for Indian and Roman Scripts
 
 How to use ??
 =============
