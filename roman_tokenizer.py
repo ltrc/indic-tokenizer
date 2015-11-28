@@ -14,7 +14,8 @@ except ImportError:
     ENCHANT = False
 
 class tokenizer():
-    def __init__(self):
+    def __init__(self, split_sen=False):
+	self.split_sen = split_sen
 	file_path = os.path.abspath(__file__).rpartition('/')[0]
         if ENCHANT:
             self.en_dict = enchant.Dict('en_US')
@@ -133,10 +134,11 @@ class tokenizer():
         text = self.restoredots.sub(lambda m: r'.%s' %('.'*(len(m.group(2))/3)), text)
 
 	#split sentences
-        text = self.splitsenr1.sub(r' \1\n\2', text)
-        text = self.splitsenr2.sub(r' \1\n\2', text)
-        text = self.splitsenr3.sub(r' \1\n\2 \3', text)
-	text = self.splitsenr4.sub(r' \1 \2\n\3', text)
+	if self.split_sen:
+	    text = self.splitsenr1.sub(r' \1\n\2', text)
+            text = self.splitsenr2.sub(r' \1\n\2', text)
+            text = self.splitsenr3.sub(r' \1\n\2 \3', text)
+	    text = self.splitsenr4.sub(r' \1 \2\n\3', text)
         
         return text
 
@@ -145,11 +147,12 @@ if __name__ == '__main__':
     # parse command line arguments 
     parser = argparse.ArgumentParser(prog="roman_tokenizer", description="Tokenizer for Roman-Scripts")
     parser.add_argument('--i', metavar='input', dest="INFILE", type=argparse.FileType('r'), default=sys.stdin, help="<input-file>")
+    parser.add_argument('--s', dest='split_sen', action='store_true', help="set this flag for splittting on sentence boundaries")
     parser.add_argument('--o', metavar='output', dest="OUTFILE", type=argparse.FileType('w'), default=sys.stdout, help="<output-file>")
     args = parser.parse_args()
 
     # initialize convertor object
-    tzr = tokenizer()
+    tzr = tokenizer(split_sen=args.split_sen)
     # convert data
     for line in args.INFILE:
         line = line.decode('utf-8')

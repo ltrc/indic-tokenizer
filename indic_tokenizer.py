@@ -14,8 +14,9 @@ except ImportError:
     ENCHANT = False
 
 class tokenizer():
-    def __init__(self, lang='hin'):
+    def __init__(self, lang='hin', split_sen=False):
         self.lang = lang
+	self.split_sen = split_sen
         self.WORD_JOINER=u'\u2060'
         self.SOFT_HYPHEN=u'\u00AD'
         self.BYTE_ORDER_MARK=u'\uFEFF'
@@ -317,12 +318,13 @@ class tokenizer():
 	    text = self.restoredviram.sub(lambda m: u'\u0965%s' %(u'\u0965'*(len(m.group(2))/4)), text)
 
 	#split sentences
-	if self.urd: 
-	    text = self.splitsenur1.sub(r' \1\n\2', text)
-	    text = self.splitsenur2.sub(r' \1 \2\n', text)
-	else: 
-	    text = self.splitsenir1.sub(r' \1\n\2', text)
-	    text = self.splitsenir2.sub(r' \1 \2\n', text)
+	if self.split_sen:
+	    if self.urd: 
+	        text = self.splitsenur1.sub(r' \1\n\2', text)
+	        text = self.splitsenur2.sub(r' \1 \2\n', text)
+	    else: 
+	        text = self.splitsenir1.sub(r' \1\n\2', text)
+	        text = self.splitsenir2.sub(r' \1 \2\n', text)
 
         return text
 
@@ -351,11 +353,12 @@ if __name__ == '__main__':
                                     formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('--i', metavar='input', dest="INFILE", type=argparse.FileType('r'), default=sys.stdin, help="<input-file>")
     parser.add_argument('--l', metavar='language', dest="lang", choices=languages, default='hin', help=lang_help)
+    parser.add_argument('--s', dest='split_sen', action='store_true', help="set this flag for splittting on sentence boundaries")
     parser.add_argument('--o', metavar='output', dest="OUTFILE", type=argparse.FileType('w'), default=sys.stdout, help="<output-file>")
     args = parser.parse_args()
 
     # initialize convertor object
-    tzr = tokenizer(lang=args.lang)
+    tzr = tokenizer(lang=args.lang, split_sen=args.split_sen)
     # convert data
     for line in args.INFILE:
         line = line.decode('utf-8')
