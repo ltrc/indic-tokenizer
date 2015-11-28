@@ -28,6 +28,7 @@ How to use ??
 		    Bodo        : bod
 		    Konkani     : kok
 		    Assamese    : asm
+    --s           set this flag for splittting on sentence boundaries
     --o output    <output-file>
 
 Contact
