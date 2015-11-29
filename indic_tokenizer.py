@@ -270,11 +270,11 @@ class tokenizer():
             text = re.sub(u'\u060C([^0-9\u0660-\u0669\u06f0-\u06f9])', ur' \u060C \1', text)
             #separate out on Urdu characters followed by non-Urdu characters and vice-versa
             text = re.sub(u'([\u0617-\u061a\u0620-\u065f\u066e-\u06d3\u06d5\u06fa-\u06ff\ufe70-\ufeff])' +
-                            u'([^\u0617-\u061a\u0620-\u065f\u066e-\u06d3\u06d5\u06fa-\u06ff\ufe70-\ufeff\u06d4\u2212-])', r'\1 \2', text)
-            text = re.sub(u'([^\u0617-\u061a\u0620-\u065f\u066e-\u06d3\u06d5\u06fa-\u06ff\ufe70-\ufeff\u06d4\u2212-])' +
+                            u'([^\u0617-\u061a\u0620-\u065f\u066e-\u06d3\u06d5\u06fa-\u06ff\ufe70-\ufeff\u06d4\u066b\u2212-])', r'\1 \2', text)
+            text = re.sub(u'([^\u0617-\u061a\u0620-\u065f\u066e-\u06d3\u06d5\u06fa-\u06ff\ufe70-\ufeff\u06d4\u066b\u2212-])' +
                             u'([\u0617-\u061a\u0620-\u065f\u066e-\u06d3\u06d5\u06fa-\u06ff\ufe70-\ufeff])', r'\1 \2', text)
             #separate out on every other special character
-            text = re.sub(u'([\u0600-\u0607\u0609\u060a\u060d\u060e\u0610-\u0614\u061b-\u061f\u066a-\u066d\u06dd\u06de\u06e9])',
+            text = re.sub(u'([\u0600-\u0607\u0609\u060a\u060d\u060e\u0610-\u0614\u061b-\u061f\u066a\u066c\u066d\u06dd\u06de\u06e9])',
                             r' \1 ', text)
 
 	if not self.urd:
