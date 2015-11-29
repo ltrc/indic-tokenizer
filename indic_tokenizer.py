@@ -263,16 +263,15 @@ class tokenizer():
             text = re.sub(u'([\u0B72-\u0B77])', r' \1 ', text)
         elif self.urd:
             #seperate out urdu full-stop i.e., "۔"
-            text = text.replace(u'\u06d4', u' \u06d4 ')
-            #seperate out urdu quotation marks i.e., "٬"
-            text = text.replace(u'\u066c', u' \u066c ')
+	    text = re.sub(u'([\u0600-\u06ff])\u06d4 ', ur'\1 \u06d4 ', text)
+	    text = re.sub(u' \u06d4([\u0600-\u06ff])', ur' \u06d4 \1', text)
             #seperate out Urdu comma i.e., "،" except for Urdu digits
-            text = re.sub(u'([^\u0660-\u0669\u06f0-\u06f9])\u060C', ur'\1 \u060C ', text)
-            text = re.sub(u'\u060C([^\u0660-\u0669\u06f0-\u06f9])', ur' \u060C \1', text)
+            text = re.sub(u'([^0-9\u0660-\u0669\u06f0-\u06f9])\u060C', ur'\1 \u060C ', text)
+            text = re.sub(u'\u060C([^0-9\u0660-\u0669\u06f0-\u06f9])', ur' \u060C \1', text)
             #separate out on Urdu characters followed by non-Urdu characters and vice-versa
             text = re.sub(u'([\u0617-\u061a\u0620-\u065f\u066e-\u06d3\u06d5\u06fa-\u06ff\ufe70-\ufeff])' +
-                            u'([^\u0617-\u061a\u0620-\u065f\u066e-\u06d3\u06d5\u06fa-\u06ff\ufe70-\ufeff\u2212-])', r'\1 \2', text)
-            text = re.sub(u'([^\u0617-\u061a\u0620-\u065f\u066e-\u06d3\u06d5\u06fa-\u06ff\ufe70-\ufeff\u2212-])' +
+                            u'([^\u0617-\u061a\u0620-\u065f\u066e-\u06d3\u06d5\u06fa-\u06ff\ufe70-\ufeff\u06d4\u2212-])', r'\1 \2', text)
+            text = re.sub(u'([^\u0617-\u061a\u0620-\u065f\u066e-\u06d3\u06d5\u06fa-\u06ff\ufe70-\ufeff\u06d4\u2212-])' +
                             u'([\u0617-\u061a\u0620-\u065f\u066e-\u06d3\u06d5\u06fa-\u06ff\ufe70-\ufeff])', r'\1 \2', text)
             #separate out on every other special character
             text = re.sub(u'([\u0600-\u0607\u0609\u060a\u060d\u060e\u0610-\u0614\u061b-\u061f\u066a-\u066d\u06dd\u06de\u06e9])',
@@ -312,7 +311,7 @@ class tokenizer():
         #restore multiple dots, purna virams and deergh virams
         text = self.restoredots.sub(lambda m: r'.%s' %('.'*(len(m.group(2))/3)), text)
 	if self.urd:
-	    text = self.restoreudots.sub(lambda m: u'\u06d4%s' %(u'\u06d4'*(len(m.group(2))/3)), text)
+	    text = self.restoreudots.sub(lambda m: u'\u06d4%s' %(u'\u06d4'*(len(m.group(2))/4)), text)
 	else:
 	    text = self.restoreviram.sub(lambda m: u'\u0964%s' %(u'\u0964'*(len(m.group(2))/4)), text)
 	    text = self.restoredviram.sub(lambda m: u'\u0965%s' %(u'\u0965'*(len(m.group(2))/4)), text)
