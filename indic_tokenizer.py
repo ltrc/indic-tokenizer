@@ -191,15 +191,15 @@ class tokenizer():
             text = re.sub(u'([^0-9\u0966-\u096f]),', r'\1 , ', text)
             text = re.sub(u',([^0-9\u0966-\u096f])', r' , \1', text)
             #separate out on Hindi characters followed by non-Hindi characters or purna viram or deergh viram and vice-versa
-            text = re.sub(u'([\u0900-\u0965\u0970-\u097f\u2212-])([^\u0900-\u0965\u0970-\u097f\u2212-]|[\u0964\u0965])', r'\1 \2', text)
-            text = re.sub(u'([^\u0900-\u0965\u0970-\u097f\u2212-]|[\u0964\u0965])([\u0900-\u0965\u0970-\u097f\u2212-])', r'\1 \2', text)
+            text = re.sub(u'([\u0900-\u0965\u0970-\u097f])([^\u0900-\u0965\u0970-\u097f\u2212-]|[\u0964\u0965])', r'\1 \2', text)
+            text = re.sub(u'([^\u0900-\u0965\u0970-\u097f\u2212-]|[\u0964\u0965])([\u0900-\u0965\u0970-\u097f])', r'\1 \2', text)
         elif self.ben:
             #seperate out "," except for Bengali and Ascii digits
             text = re.sub(u'([^0-9\u09e6-\u09ef]),', r'\1 , ', text)
             text = re.sub(u',([^0-9\u09e6-\u09ef])', r' , \1', text)
             #separate out on Bengali characters followed by non-Bengali characters or purna viram or deergh viram and vice-versa
-            text = re.sub(u'([\u0980-\u09e5\u09f0-\u09ff\u2212-])([^\u0980-\u09e5\u09f0-\u09ff\u2212-]|[\u0964-\u0965])', r'\1 \2', text)
-            text = re.sub(u'([^\u0980-\u09e5\u09f0-\u09ff\u2212-]|[\u0964-\u0965])([\u0980-\u09e5\u09f0-\u09ff\u2212-])', r'\1 \2', text)
+            text = re.sub(u'([\u0980-\u09e5\u09f0-\u09ff])([^\u0980-\u09e5\u09f0-\u09ff\u2212-]|[\u0964-\u0965])', r'\1 \2', text)
+            text = re.sub(u'([^\u0980-\u09e5\u09f0-\u09ff\u2212-]|[\u0964-\u0965])([\u0980-\u09e5\u09f0-\u09ff])', r'\1 \2', text)
             #seperate out Bengali special chars (currency signs, BENGALI ISSHAR)
             text = re.sub(u'([\u09f2\u09f3\u09fa\u09fb])', r' \1 ', text)
         elif self.guj:
@@ -207,8 +207,8 @@ class tokenizer():
             text = re.sub(u'([^0-9\u0ae6-\u0aef]),', r'\1 , ', text)
             text = re.sub(u',([^0-9\u0ae6-\u0aef])', r' , \1', text)
             #separate out on Gujrati characters followed by non-Gujrati characters or purna viram or deergh viram and vice-versa
-            text = re.sub(u'([\u0A80-\u0AE5\u0Af0-\u0Aff\u2212-])([^\u0A80-\u0AE5\u0Af0-\u0Aff\u2212-]|[\u0964-\u0965])', r'\1 \2', text)
-            text = re.sub(u'([^\u0A80-\u0AE5\u0Af0-\u0Aff\u2212-]|[\u0964-\u0965])([\u0A80-\u0AE5\u0Af0-\u0Aff\u2212-])', r'\1 \2', text)
+            text = re.sub(u'([\u0A80-\u0AE5\u0Af0-\u0Aff])([^\u0A80-\u0AE5\u0Af0-\u0Aff\u2212-]|[\u0964-\u0965])', r'\1 \2', text)
+            text = re.sub(u'([^\u0A80-\u0AE5\u0Af0-\u0Aff\u2212-]|[\u0964-\u0965])([\u0A80-\u0AE5\u0Af0-\u0Aff])', r'\1 \2', text)
             #seperate out Gujurati special chars (currency signs, GUJARATI OM)
             text = re.sub(u'([\u0AD0\u0AF1])', r' \1 ', text)
         elif self.mal:
@@ -216,8 +216,8 @@ class tokenizer():
             text = re.sub(u'([^0-9\u0d66-\u0d6f]),', r'\1 , ', text)
             text = re.sub(u',([^0-9\u0d66-\u0d6f])', r' , \1', text)
             #separate out on Malayalam characters followed by non-Malayalam characters or purna viram or deergh viram and vice-versa
-            text = re.sub(u'([\u0D00-\u0D65\u0D73-\u0D7f\u2212-])([^\u0D00-\u0D65\u0D73-\u0D7f\u2212-]|[\u0964-\u0965])', r'\1 \2', text)
-            text = re.sub(u'([^\u0D00-\u0D65\u0D73-\u0D7f\u2212-]|[\u0964-\u0965])([\u0D00-\u0D65\u0D73-\u0D7f\u2212-])', r'\1 \2', text)
+            text = re.sub(u'([\u0D00-\u0D65\u0D73-\u0D7f])([^\u0D00-\u0D65\u0D73-\u0D7f\u2212-]|[\u0964-\u0965])', r'\1 \2', text)
+            text = re.sub(u'([^\u0D00-\u0D65\u0D73-\u0D7f\u2212-]|[\u0964-\u0965])([\u0D00-\u0D65\u0D73-\u0D7f])', r'\1 \2', text)
             #seperate out Malayalam fraction symbols
             text = re.sub(u'([\u0d73\u0d74\u0d75])', r' \1 ', text)
         elif self.pan:
@@ -225,15 +225,15 @@ class tokenizer():
             text = re.sub(u'([^0-9\u0a66-\u0a6f]),', r'\1 , ', text)
             text = re.sub(u',([^0-9\u0a66-\u0a6f])', r' , \1', text)
             #separate out on Punjabi characters followed by non-Punjabi characters or purna viram or deergh viram and vice-versa
-            text = re.sub(u'([\u0A00-\u0A65\u0A70-\u0A7f\u2212-])([^\u0A00-\u0A65\u0A70-\u0A7f\u2212-]|[\u0964-\u0965])', r'\1 \2', text)
-            text = re.sub(u'([^\u0A00-\u0A65\u0A70-\u0A7f\u2212-]|[\u0964-\u0965])([\u0A00-\u0A65\u0A70-\u0A7f\u2212-])', r'\1 \2', text)
+            text = re.sub(u'([\u0A00-\u0A65\u0A70-\u0A7f])([^\u0A00-\u0A65\u0A70-\u0A7f\u2212-]|[\u0964-\u0965])', r'\1 \2', text)
+            text = re.sub(u'([^\u0A00-\u0A65\u0A70-\u0A7f\u2212-]|[\u0964-\u0965])([\u0A00-\u0A65\u0A70-\u0A7f])', r'\1 \2', text)
         elif self.tel:
             #seperate out "," except for Telugu and Ascii digits
             text = re.sub(u'([^0-9\u0c66-\u0c6f]),', r'\1 , ', text)
             text = re.sub(u',([^0-9\u0c66-\u0c6f])', r' , \1', text)
             #separate out on Telugu characters followed by non-Telugu characters or purna viram or deergh viram and vice-versa
-            text = re.sub(u'([\u0c00-\u0c65\u0c70-\u0c7f\u2212-])([^\u0c00-\u0c65\u0c70-\u0c7f\u2212-]|[\u0964-\u0965])', r'\1 \2', text)
-            text = re.sub(u'([^\u0c00-\u0c65\u0c70-\u0c7f\u2212-]|[\u0964-\u0965])([\u0c00-\u0c65\u0c70-\u0c7f\u2212-])', r'\1 \2', text)
+            text = re.sub(u'([\u0c00-\u0c65\u0c70-\u0c7f])([^\u0c00-\u0c65\u0c70-\u0c7f\u2212-]|[\u0964-\u0965])', r'\1 \2', text)
+            text = re.sub(u'([^\u0c00-\u0c65\u0c70-\u0c7f\u2212-]|[\u0964-\u0965])([\u0c00-\u0c65\u0c70-\u0c7f])', r'\1 \2', text)
             #separate out Telugu fractions and weights
             text = re.sub(u'([\u0c78-\u0c7f])', r' \1 ', text)
         elif self.tam:
@@ -241,8 +241,8 @@ class tokenizer():
             text = re.sub(u'([^0-9\u0be6-\u0bef]),', r'\1 , ', text)
             text = re.sub(u',([^0-9\u0be6-\u0bef])', r' , \1', text)
             #separate out on Tamil characters followed by non-Tamil characters or purna viram or deergh viram and vice-versa
-            text = re.sub(u'([\u0B80-\u0Be5\u0Bf3-\u0Bff\u2212-])([^\u0B80-\u0Be5\u0Bf3-\u0Bff\u2212-]|[\u0964-\u0965])', r'\1 \2', text)
-            text = re.sub(u'([^\u0B80-\u0Be5\u0Bf3-\u0Bff\u2212-]|[\u0964-\u0965])([\u0B80-\u0Be5\u0Bf3-\u0Bff\u2212-])', r'\1 \2', text)
+            text = re.sub(u'([\u0B80-\u0Be5\u0Bf3-\u0Bff])([^\u0B80-\u0Be5\u0Bf3-\u0Bff\u2212-]|[\u0964-\u0965])', r'\1 \2', text)
+            text = re.sub(u'([^\u0B80-\u0Be5\u0Bf3-\u0Bff\u2212-]|[\u0964-\u0965])([\u0B80-\u0Be5\u0Bf3-\u0Bff])', r'\1 \2', text)
             #seperate out Tamil special symbols (calendrical, clerical, currency signs etc.)
             text = re.sub(u'([\u0bd0\u0bf3-\u0bff])', r' \1 ', text)
         elif self.kan:
@@ -250,15 +250,15 @@ class tokenizer():
             text = re.sub(u'([^0-9\u0ce6-\u0cef]),', r'\1 , ', text)
             text = re.sub(u',([^0-9\u0ce6-\u0cef])', r' , \1', text)
             #separate out on Kanadda characters followed by non-Kanadda characters or purna viram or deergh viram and vice-versa
-            text = re.sub(u'([\u0C80-\u0Ce5\u0Cf1-\u0Cff\u2212-])([^\u0C80-\u0Ce5\u0Cf1-\u0Cff\u2212-]|[\u0964-\u0965])', r'\1 \2', text)
-            text = re.sub(u'([^\u0C80-\u0Ce5\u0Cf1-\u0Cff]\u2212-|[\u0964-\u0965])([\u0C80-\u0Ce5\u0Cf1-\u0Cff\u2212-])', r'\1 \2', text)
+            text = re.sub(u'([\u0C80-\u0Ce5\u0Cf1-\u0Cff])([^\u0C80-\u0Ce5\u0Cf1-\u0Cff\u2212-]|[\u0964-\u0965])', r'\1 \2', text)
+            text = re.sub(u'([^\u0C80-\u0Ce5\u0Cf1-\u0Cff]\u2212-|[\u0964-\u0965])([\u0C80-\u0Ce5\u0Cf1-\u0Cff])', r'\1 \2', text)
         elif self.ori:
             #seperate out "," except for Oriya and Ascii digits
             text = re.sub(u'([^0-9\u0b66-\u0b6f]),', r'\1 , ', text)
             text = re.sub(u',([^0-9\u0b66-\u0b6f])', r' , \1', text)
             #separate out on Oriya characters followed by non-Oriya characters or purna viram or deergh viram and vice-versa
-            text = re.sub(u'([\u0B00-\u0B65\u0B70-\u0B7f\u2212-])([^\u0B00-\u0B65\u0B70-\u0B7f\u2212-]|[\u0964-\u0965])', r'\1 \2', text)
-            text = re.sub(u'([^\u0B00-\u0B65\u0B70-\u0B7f\u2212-]|[\u0964-\u0965])([\u0B00-\u0B65\u0B70-\u0B7f\u2212-])', r'\1 \2', text)
+            text = re.sub(u'([\u0B00-\u0B65\u0B70-\u0B7f])([^\u0B00-\u0B65\u0B70-\u0B7f\u2212-]|[\u0964-\u0965])', r'\1 \2', text)
+            text = re.sub(u'([^\u0B00-\u0B65\u0B70-\u0B7f\u2212-]|[\u0964-\u0965])([\u0B00-\u0B65\u0B70-\u0B7f])', r'\1 \2', text)
             #seperate out Oriya fraction symbols
             text = re.sub(u'([\u0B72-\u0B77])', r' \1 ', text)
         elif self.urd:
@@ -270,10 +270,10 @@ class tokenizer():
             text = re.sub(u'([^\u0660-\u0669\u06f0-\u06f9])\u060C', ur'\1 \u060C ', text)
             text = re.sub(u'\u060C([^\u0660-\u0669\u06f0-\u06f9])', ur' \u060C \1', text)
             #separate out on Urdu characters followed by non-Urdu characters and vice-versa
-            text = re.sub(u'([\u0617-\u061a\u0620-\u065f\u066e-\u06d3\u06d5\u06fa-\u06ff\ufe70-\ufeff\u2212-])' +
+            text = re.sub(u'([\u0617-\u061a\u0620-\u065f\u066e-\u06d3\u06d5\u06fa-\u06ff\ufe70-\ufeff])' +
                             u'([^\u0617-\u061a\u0620-\u065f\u066e-\u06d3\u06d5\u06fa-\u06ff\ufe70-\ufeff\u2212-])', r'\1 \2', text)
             text = re.sub(u'([^\u0617-\u061a\u0620-\u065f\u066e-\u06d3\u06d5\u06fa-\u06ff\ufe70-\ufeff\u2212-])' +
-                            u'([\u0617-\u061a\u0620-\u065f\u066e-\u06d3\u06d5\u06fa-\u06ff\ufe70-\ufeff\u2212-])', r'\1 \2', text)
+                            u'([\u0617-\u061a\u0620-\u065f\u066e-\u06d3\u06d5\u06fa-\u06ff\ufe70-\ufeff])', r'\1 \2', text)
             #separate out on every other special character
             text = re.sub(u'([\u0600-\u0607\u0609\u060a\u060d\u060e\u0610-\u0614\u061b-\u061f\u066a-\u066d\u06dd\u06de\u06e9])',
                             r' \1 ', text)
