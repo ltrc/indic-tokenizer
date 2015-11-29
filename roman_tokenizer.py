@@ -40,7 +40,7 @@ class tokenizer():
         # general unicode punctituations except "’"
         self.upunct = re.compile(u'([\u2000-\u2018\u201a-\u206f])')
         # unicode mathematical operators
-        self.umathop = re.compile(u'([\u2200-\u22ff])')
+	self.umathop = re.compile(u'([\u2200-\u2211\u2213-\u22ff])')
         # unicode fractions
         self.ufrac = re.compile(u'([\u2150-\u2160])')
         # unicode superscripts and subscripts
