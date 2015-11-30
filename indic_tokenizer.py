@@ -31,8 +31,8 @@ class tokenizer():
             self.en_dict = enchant.Dict('en_US')
 
         self.ben = lang in ["ben", "asm"]
+	self.urd = lang in ['urd', 'kas']
         self.dev = lang in ["hin", "mar", "nep", "bod", "kok"]
-	self.urd = lang == 'urd'
 	self.tam = lang == 'tam'
 	self.tel = lang == 'tel'
 	self.mal = lang == 'mal'
@@ -344,8 +344,9 @@ if __name__ == '__main__':
 		Gujarati    : guj
 		Bodo        : bod
 		Konkani     : kok
-		Assamese    : asm"""
-    languages = "hin urd ben asm guj mal pan tel tam kan ori mar nep bod kok".split()
+		Assamese    : asm
+		Kashmiri    : kas"""
+    languages = "hin urd ben asm guj mal pan tel tam kan ori mar nep bod kok kas".split()
     # parse command line arguments 
     parser = argparse.ArgumentParser(prog="indic_tokenizer", 
                                     description="Tokenizer for Indian Scripts",
