@@ -48,7 +48,7 @@ class tokenizer():
         # unicode currency symbols
         self.ucurrency = re.compile(u'([\u20a0-\u20cf])')
         # all "other" ASCII special characters
-        self.specascii = re.compile(u"([^\u0080-\U0010ffffa-zA-Z0-9\s\.'`,-])")
+        self.specascii = re.compile(u"([^\u0080-\U0010ffffa-zA-Z0-9\s\.',-])")
 
         #keep multiple dots together
         self.multidot = re.compile(r'(\.\.+)([^\.])')
