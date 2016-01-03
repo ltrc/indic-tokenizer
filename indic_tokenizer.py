@@ -6,13 +6,6 @@ import sys
 import os.path
 import argparse
 
-ENCHANT = True
-
-try:
-    import enchant
-except ImportError:
-    ENCHANT = False
-
 class tokenizer():
     def __init__(self, lang='hin', split_sen=False):
         self.lang = lang
@@ -27,8 +20,6 @@ class tokenizer():
         self.ZERO_WIDTH_NON_JOINER=u'\u200C'
 
         file_path = os.path.abspath(__file__).rpartition('/')[0]
-        if ENCHANT:
-            self.en_dict = enchant.Dict('en_US')
 
         self.ben = lang in ["ben", "asm"]
 	self.urd = lang in ['urd', 'kas']
@@ -42,8 +33,8 @@ class tokenizer():
 	self.ori = lang == 'ori'
 
         #load nonbreaking prefixes from file
+	self.NBP = dict()
 	with open('%s/NONBREAKING_PREFIXES' %file_path) as fp:
-	    self.NBP = dict()
 	    for line in fp:
 		if line.startswith('#'): continue
 		if '#NUMERIC_ONLY#' in line:
@@ -52,9 +43,9 @@ class tokenizer():
 		    self.NBP[line.strip()] = 1
     
 	#precompile regexes
-	self.compile_regexes()
+	self.fit()
 
-    def compile_regexes(self):
+    def fit(self):
         # remove junk characters
         self.junk = re.compile('[\x00-\x1f]')
         # seperate out on Latin-1 supplementary characters
@@ -70,7 +61,8 @@ class tokenizer():
         # seperate out on unicode currency symbols
         self.ucurrency = re.compile(u'([\u20a0-\u20cf])')
         # seperate out all "other" ASCII special characters
-        self.specascii = re.compile(u"([^\u0080-\U0010ffffa-zA-Z0-9\s\.',-])")	
+	self.specascii = re.compile(r'([\\!@#$%^&*()_+={\[}\]|";:<>?`~/])')
+        #self.specascii = re.compile(u"([^\u0080-\U0010ffffa-zA-Z0-9\s\.',-])")	
 
         #keep multiple dots together
         self.multidot = re.compile(r'(\.\.+)([^\.])')
@@ -129,7 +121,9 @@ class tokenizer():
         return text
 
     def tokenize(self, text):
-        text = ' %s ' %' '.join(text.split())
+	text = text.decode('utf-8', errors='ignore')
+	text = self.normalize(text)
+        text = ' %s ' %(text)
         # remove junk characters
         text = self.junk.sub('', text)
         # seperate out on Latin-1 supplementary characters
@@ -178,11 +172,7 @@ class tokenizer():
                 elif ('.' in dotless and re.search('[a-zA-Z]', dotless)) or \
                     self.NBP.get(dotless, 0) == 1 or (i<text_len and words[i+1][0].islower()): pass
                 elif self.NBP.get(dotless, 0) == 2 and (i<text_len and words[i+1][0].isdigit()): pass
-                elif i < text_len and words[i+1][0].isdigit():
-                    if not ENCHANT: pass
-                    elif ((len(dotless) > 2) and (self.en_dict.check(dotless.lower()) or \
-                        self.en_dict.check(dotless.title()))):
-                        word = dotless + ' .'
+                elif i < text_len and words[i+1][0].isdigit(): pass 
                 else: word = dotless + ' .'
             text += "%s " %word
 
@@ -277,12 +267,6 @@ class tokenizer():
             text = re.sub(u'([\u0600-\u0607\u0609\u060a\u060d\u060e\u0610-\u0614\u061b-\u061f\u066a\u066c\u066d\u06dd\u06de\u06e9])',
                             r' \1 ', text)
 
-	if not self.urd:
-	    #Normalize "|" to purna viram 
-	    text = text.replace('|', u'\u0964')
-	    #Normalize ". ।" to "।"
-	    text = re.sub(u'\.\s+\u0964', u'\u0964', text)
-      
 	#seperate out hyphens 
         text = self.multihyphen.sub(lambda m: r'%s' %(' '.join('-'*len(m.group(1)))), text) 
 	if self.dev:
@@ -306,7 +290,8 @@ class tokenizer():
         elif self.urd:
             text = re.sub(u'(-?[0-9\u0660-\u0669\u06f0-\u06f9]-+[0-9\u0660-\u0669\u06f0-\u06f9]-?){,}',
                             lambda m: r'%s' %(m.group().replace('-', ' - ')), text)
-        text = ' '.join(text.split())
+	text = text.split()
+        text = ' '.join(text)
 
         #restore multiple dots, purna virams and deergh virams
         text = self.restoredots.sub(lambda m: r'.%s' %('.'*(len(m.group(2))/3)), text)
@@ -324,7 +309,8 @@ class tokenizer():
 	    else: 
 	        text = self.splitsenir1.sub(r' \1\n\2', text)
 	        text = self.splitsenir2.sub(r' \1 \2\n', text)
-
+	
+	text = text.encode('utf-8')
         return text
 
 if __name__ == '__main__':
@@ -361,10 +347,7 @@ if __name__ == '__main__':
     tzr = tokenizer(lang=args.lang, split_sen=args.split_sen)
     # convert data
     for line in args.INFILE:
-        line = line.decode('utf-8')
-        line = tzr.normalize(line)
         line = tzr.tokenize(line)
-        line = line.encode('utf-8')
         args.OUTFILE.write('%s\n' %line)
 
     # close files 
