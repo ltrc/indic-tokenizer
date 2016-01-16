@@ -29,7 +29,7 @@ class tokenizer():
         # Latin-1 supplementary characters
         self.latin = re.compile(ur'([\xa1-\xbf\xd7\xf7])')
         # general unicode punctituations except "’"
-        self.upunct = re.compile(ur'([\u2000-\u2018\u201a-\u206f])')
+        self.upunct = re.compile(ur'([\u2012-\u2018\u201a-\u206f])')
         # unicode mathematical operators
 	self.umathop = re.compile(ur'([\u2200-\u2211\u2213-\u22ff])')
         # unicode fractions

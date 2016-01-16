@@ -51,7 +51,7 @@ class tokenizer():
         # seperate out on Latin-1 supplementary characters
         self.latin = re.compile(u'([\xa1-\xbf\xd7\xf7])')
         # seperate out on general unicode punctituations except "’"
-        self.upunct = re.compile(u'([\u2000-\u2018\u201a-\u206f])')
+        self.upunct = re.compile(u'([\u2012-\u2018\u201a-\u206f])')
         # seperate out on unicode mathematical operators
         self.umathop = re.compile(u'([\u2200-\u2211\u2213-\u22ff])')
         # seperate out on unicode fractions
