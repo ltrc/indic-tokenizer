@@ -24,7 +24,7 @@ Install
 Example
 ~~~~~~~
 
-1. working with files:
+1. Working with files:
 ----------------------
 
 a. Indic Tokenizer:
@@ -66,14 +66,15 @@ b. Roman Tokenizer:
     --o output  <output-file>
     --s         set this flag to apply sentence segmentation
 
-.. parsed-literal::
+.. code:: bash
 
     echo "The real question should be: does it matter at all? The Vegas horse-race aspect of the Oscars is, of course, irresistible, but apart from that, what meaning, if any, does the contest really have? Does it tell us anything about the movies nominated, or about film culture in general?" | rom-tokz --s
     The real question should be : does it matter at all ?
     The Vegas horse-race aspect of the Oscars is , of course , irresistible , but apart from that , what meaning , if any , does the contest really have ?
     Does it tell us anything about the movies nominated , or about film culture in general ?
 
-2. **using python**
+2. Using python:
+----------------
 
 .. code:: python
 
