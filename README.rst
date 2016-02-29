@@ -72,7 +72,7 @@ Example
     ... The third act deals with Su-jin's early-onset Alzheimer's disease diagnosis, and the couple's consequent response to it. Su-jin at first experiences denial, then becomes heavily burdened by the knowledge that she will forget her husband. Nevertheless, they make the commitment to stay together and as the disease progresses, the trials the couple go through increase because of Su-jin's deteriorating memory. Finally, Su-jin makes the decision to leave their home and check herself into an assisted facility.
     ... 
     ... Despite his grief, Chul-soo remains at Su-jin's side even when she doesn't remember him, hiding his eyes behind sunglasses when he visits her so she can't see his tears. At the end of the film, Chul-soo reenacts the first time they met in the convenience store, with all of Su-jin's friends and family there. In the final scene, Su-jin is riding in a car beside her husband at sunset, and he tells her, "I love you." """
-    >>> print tok.tokenize(text)
+    >>> print(tok.tokenize(text))
     The first act of the film introduces the protagonists , a woman named Su-jin and a man named Chul-soo .
     The movie highlights their accidental meeting , followed by their subsequent courting despite their difference in social status that should have kept them apart .
     Kim Su-jin is a 27-year-old fashion designer , spurned by her lover , a colleague who was also a married man .
@@ -94,6 +94,22 @@ Example
     At the end of the film , Chul-soo reenacts the first time they met in the convenience store , with all of Su-jin 's friends and family there .
     In the final scene , Su-jin is riding in a car beside her husband at sunset , and he tells her , " I love you . "
     >>> 
+    >>> from irtokz import tokenize_ind
+    >>> tok = tokenize_ind(lang='hin', split_sen=True)
+    >>> text = """22 साल के लंबे इंतजार के बाद आखिरकार हॉलीवुड स्टार लियोनार्डो डिकैप्रियो को अपनी पहली ऑस्कर ट्रॉफी मिल चुकी है। उन्हें ये अवॉर्ड अपनी फिल्म ‘द रेवेनेंट’ में ह्यूज ग्लास के किरदार के लिए मिला, लेकिन उनके के लिए रोल निभाना आसान नहीं था। फिल्म एक सीन के लिए लियोनार्डो को भैंस का कच्चा लीवर खाना पड़ा था। जबकि असल जिंदगी में वो पूरी तरह शाकाहारी हैं। हालांकि इस सीन के लिए पहले लियोनार्डो को मांस जैसे दिखने वाली चीज दी गई थी, लेकिन उन्हें लगा कि ऐसा करना गलत होगा। फिल्म के लिए इम्पोर्ट की गई चीटियां...
+    ... फिल्म की शूटिंग के बाद प्रोड्यूसर्स ने ये राज खोला कि एक पर्टीकुलर सीन के लिए उन्हें ढेर सारी चीटियों की जरूरत थी, जो कैलगरी जैसे ठंडे इलाके में नहीं थी। इसलिए उन्होंने औरिगन और ओंटारियो (अमेरिका) से चीटियां मंगवाई। मगर मौसम में बदलाव की वजह से ये चीटियां रास्ते में ही मर गईं। बाद में उन्हें फिर से दोबारा चीटियां मंगवानी पड़ीं।
+    ... """
+    >>> print(tok.tokenize(text))
+    22 साल के लंबे इंतजार के बाद आखिरकार हॉलीवुड स्टार लियोनार्डो डिकैप्रियो को अपनी पहली ऑस्कर ट्रॉफी मिल चुकी है ।
+    उन्हें ये अवॉर्ड अपनी फिल्म ‘ द रेवेनेंट ’ में ह्यूज ग्लास के किरदार के लिए मिला , लेकिन उनके के लिए रोल निभाना आसान नहीं था ।
+    फिल्म एक सीन के लिए लियोनार्डो को भैंस का कच्चा लीवर खाना पड़ा था ।
+    जबकि असल जिंदगी में वो पूरी तरह शाकाहारी हैं ।
+    हालांकि इस सीन के लिए पहले लियोनार्डो को मांस जैसे दिखने वाली चीज दी गई थी , लेकिन उन्हें लगा कि ऐसा करना गलत होगा ।
+    फिल्म के लिए इम्पोर्ट की गई चीटियां ... फिल्म की शूटिंग के बाद प्रोड्यूसर्स ने ये राज खोला कि एक पर्टीकुलर सीन के लिए उन्हें ढेर सारी चीटियों की जरूरत थी , जो कैलगरी जैसे ठंडे इलाके में नहीं थी ।
+    इसलिए उन्होंने औरिगन और ओंटारियो ( अमेरिका ) से चीटियां मंगवाई ।
+    मगर मौसम में बदलाव की वजह से ये चीटियां रास्ते में ही मर गईं ।
+    बाद में उन्हें फिर से दोबारा चीटियां मंगवानी पड़ीं ।
+
 
 Contact
 =======
