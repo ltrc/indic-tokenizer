@@ -6,13 +6,13 @@ import os
 import sys
 import argparse
 
-class tokenizer():
+class tokenize_rom():
     def __init__(self, split_sen=False):
 	self.split_sen = split_sen
 	file_path = os.path.abspath(__file__).rpartition('/')[0]
 
         self.NBP = dict()
-        with open('%s/NONBREAKING_PREFIXES' %file_path) as fp:
+        with open('%s/data/NONBREAKING_PREFIXES' %file_path) as fp:
             for line in fp:
                 if line.startswith('#'): continue
                 if '#NUMERIC_ONLY#' in line:
@@ -153,7 +153,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     # initialize convertor object
-    tzr = tokenizer(split_sen=args.split_sen)
+    tzr = tokenize_rom(split_sen=args.split_sen)
     # convert data
     for line in args.INFILE:
         line = tzr.tokenize(line)

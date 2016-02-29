@@ -6,19 +6,10 @@ import sys
 import os.path
 import argparse
 
-class tokenizer():
+class tokenize_ind():
     def __init__(self, lang='hin', split_sen=False):
         self.lang = lang
 	self.split_sen = split_sen
-        self.WORD_JOINER=u'\u2060'
-        self.SOFT_HYPHEN=u'\u00AD'
-        self.BYTE_ORDER_MARK=u'\uFEFF'
-        self.BYTE_ORDER_MARK_2=u'\uFFFE'
-        self.NO_BREAK_SPACE=u'\u00A0'
-        self.ZERO_WIDTH_SPACE=u'\u200B'
-        self.ZERO_WIDTH_JOINER=u'\u200D'
-        self.ZERO_WIDTH_NON_JOINER=u'\u200C'
-
         file_path = os.path.abspath(__file__).rpartition('/')[0]
 
         self.ben = lang in ["ben", "asm"]
@@ -34,7 +25,7 @@ class tokenizer():
 
         #load nonbreaking prefixes from file
 	self.NBP = dict()
-	with open('%s/NONBREAKING_PREFIXES' %file_path) as fp:
+	with open('%s/data/NONBREAKING_PREFIXES' %file_path) as fp:
 	    for line in fp:
 		if line.startswith('#'): continue
 		if '#NUMERIC_ONLY#' in line:
@@ -106,17 +97,14 @@ class tokenizer():
             - ZERO_WIDTH_NON_JOINER and ZERO_WIDTH_JOINER removal 
             - ZERO_WIDTH_SPACE and NO_BREAK_SPACE replaced by spaces 
         """
-
-        text=text.replace(self.BYTE_ORDER_MARK,'')
-        text=text.replace(self.BYTE_ORDER_MARK_2,'')
-        text=text.replace(self.WORD_JOINER,'')
-        text=text.replace(self.SOFT_HYPHEN,'')
-
-        text=text.replace(self.ZERO_WIDTH_SPACE,' ') 
-        text=text.replace(self.NO_BREAK_SPACE,' ')
-
-        text=text.replace(self.ZERO_WIDTH_NON_JOINER, '')
-        text=text.replace(self.ZERO_WIDTH_JOINER,'')
+        text=text.replace(u'\uFEFF', '')     #BYTE_ORDER_MARK
+        text=text.replace(u'\uFFFE', '')     #BYTE_ORDER_MARK_2
+        text=text.replace(u'\u2060', '')     #WORD_JOINER
+        text=text.replace(u'\u00AD', '')     #SOFT_HYPHEN
+        text=text.replace(u'\u200B', ' ')    #ZERO_WIDTH_SPACE
+        text=text.replace(u'\u00A0', ' ')    #NO_BREAK_SPACE
+        text=text.replace(u'\u200D', '')     #ZERO_WIDTH_JOINER
+        text=text.replace(u'\u200C', '')     #ZERO_WIDTH_NON_JOINER
 
         return text
 
@@ -344,7 +332,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     # initialize convertor object
-    tzr = tokenizer(lang=args.lang, split_sen=args.split_sen)
+    tzr = tokenize_ind(lang=args.lang, split_sen=args.split_sen)
     # convert data
     for line in args.INFILE:
         line = tzr.tokenize(line)
