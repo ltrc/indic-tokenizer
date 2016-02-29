@@ -24,7 +24,11 @@ Install
 Example
 ~~~~~~~
 
-1. **working with files:**
+1. working with files:
+----------------------
+
+a. Indic Tokenizer:
+^^^^^^^^^^^^^^^^^^^
 
 .. parsed-literal::
 
@@ -51,11 +55,18 @@ Example
 		    Assamese    : asm
 		    Kashmiri    : kas
 
+b. Roman Tokenizer:
+^^^^^^^^^^^^^^^^^^^
+
+.. parsed-literal::
+
     rom-tokz --i inputfile --o outputfile     
 
     --i input   <input-file>
     --o output  <output-file>
     --s         set this flag to apply sentence segmentation
+
+.. parsed-literal::
 
     echo "The real question should be: does it matter at all? The Vegas horse-race aspect of the Oscars is, of course, irresistible, but apart from that, what meaning, if any, does the contest really have? Does it tell us anything about the movies nominated, or about film culture in general?" | rom-tokz --s
     The real question should be : does it matter at all ?
