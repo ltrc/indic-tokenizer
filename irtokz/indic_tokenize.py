@@ -88,8 +88,8 @@ class tokenize_ind():
             self.splitsenur1 = re.compile(u' ([.?\u06d4]) ([\u0617-\u061a\u0620-\u065f\u066e-\u06d3\u06d5\u06fa-\u06ff\u201d\u2019A-Z])')
             self.splitsenur2 = re.compile(u' ([.?\u06d4]) ([\)\}\]\'"\u2018\u201c> ]+) ')
         else: 
-            self.splitsenir1 = re.compile(u' ([.?\u0964\u0965]) ([\u0900-\u0d7f\u201c\u2018A-Z])')
-            self.splitsenir2 = re.compile(u' ([.?\u0964\u0965]) ([\)\}\]\'"\u2019\u201d> ]+) ')
+            self.splitsenir1 = re.compile(u' ([|.?\u0964\u0965]) ([\u0900-\u0d7f\u201c\u2018A-Z])')
+            self.splitsenir2 = re.compile(u' ([|.?\u0964\u0965]) ([\)\}\]\'"\u2019\u201d> ]+) ')
 
     def normalize(self,text):
         """
