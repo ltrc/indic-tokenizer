@@ -62,10 +62,10 @@ class tokenize_rom():
 
         #split sentences
 	if self.split_sen:
-	    self.splitsenr1 = re.compile(ur' ([!.?]) ([A-Z])')
-            self.splitsenr2 = re.compile(ur' ([!.?]) ([\'" ]+) ([A-Z])')
-            self.splitsenr3 = re.compile(ur' ([!.?]) ([\u201c\u2018 ]+ [A-Z])')
-            self.splitsenr4 = re.compile(ur' ([!.?]) ([\'"\)\}\]\u2019\u201d> ]+) ([A-Z])')
+	    self.splitsenr1 = re.compile(ur' ([.?]) ([A-Z])')
+            self.splitsenr2 = re.compile(ur' ([.?]) ([\'" ]+) ([A-Z])')
+            self.splitsenr3 = re.compile(ur' ([.?]) ([\u201c\u2018 ]+ [A-Z])')
+            self.splitsenr4 = re.compile(ur' ([.?]) ([\'"\)\}\]\u2019\u201d> ]+) ([A-Z])')
 
     def tokenize(self, text):
         text = text.decode('utf-8', errors='ignore')

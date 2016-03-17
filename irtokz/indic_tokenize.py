@@ -9,32 +9,33 @@ import argparse
 class tokenize_ind():
     def __init__(self, lang='hin', split_sen=False):
         self.lang = lang
-	self.split_sen = split_sen
+        self.split_sen = split_sen
         file_path = os.path.abspath(__file__).rpartition('/')[0]
 
         self.ben = lang in ["ben", "asm"]
-	self.urd = lang in ['urd', 'kas']
+        self.urd = lang in ['urd', 'kas']
         self.dev = lang in ["hin", "mar", "nep", "bod", "kok"]
-	self.tam = lang == 'tam'
-	self.tel = lang == 'tel'
-	self.mal = lang == 'mal'
-	self.kan = lang == 'kan'
-	self.guj = lang == 'guj'
-	self.pan = lang == 'pan'
-	self.ori = lang == 'ori'
+        self.tam = lang == 'tam'
+        self.tel = lang == 'tel'
+        self.mal = lang == 'mal'
+        self.kan = lang == 'kan'
+        self.guj = lang == 'guj'
+        self.pan = lang == 'pan'
+        self.ori = lang == 'ori'
 
         #load nonbreaking prefixes from file
-	self.NBP = dict()
-	with open('%s/data/NONBREAKING_PREFIXES' %file_path) as fp:
-	    for line in fp:
-		if line.startswith('#'): continue
-		if '#NUMERIC_ONLY#' in line:
-		    self.NBP[line.replace('#NUMERIC_ONLY#', '').split()[0]] = 2
-		else:
-		    self.NBP[line.strip()] = 1
+        self.NBP = dict()
+        with open('%s/data/NONBREAKING_PREFIXES' %file_path) as fp:
+            for line in fp:
+                if line.startswith('#'):
+                    continue
+                if '#NUMERIC_ONLY#' in line:
+                    self.NBP[line.replace('#NUMERIC_ONLY#', '').split()[0]] = 2
+                else:
+                    self.NBP[line.strip()] = 1
     
-	#precompile regexes
-	self.fit()
+        #precompile regexes
+        self.fit()
 
     def fit(self):
         # remove junk characters
@@ -52,8 +53,8 @@ class tokenize_ind():
         # seperate out on unicode currency symbols
         self.ucurrency = re.compile(u'([\u20a0-\u20cf])')
         # seperate out all "other" ASCII special characters
-	self.specascii = re.compile(r'([\\!@#$%^&*()_+={\[}\]|";:<>?`~/])')
-        #self.specascii = re.compile(u"([^\u0080-\U0010ffffa-zA-Z0-9\s\.',-])")	
+        self.specascii = re.compile(r'([\\!@#$%^&*()_+={\[}\]|";:<>?`~/])')
+        #self.specascii = re.compile(u"([^\u0080-\U0010ffffa-zA-Z0-9\s\.',-])") 
 
         #keep multiple dots together
         self.multidot = re.compile(r'(\.\.+)([^\.])')
@@ -84,11 +85,11 @@ class tokenize_ind():
 
         #split sentences
         if self.urd:
-            self.splitsenur1 = re.compile(u' ([!.?\u06d4]) ([\u0617-\u061a\u0620-\u065f\u066e-\u06d3\u06d5\u06fa-\u06ff\u201d\u2019A-Z])')
-            self.splitsenur2 = re.compile(u' ([!.?\u06d4]) ([\)\}\]\'"\u2018\u201c> ]+) ')
+            self.splitsenur1 = re.compile(u' ([.?\u06d4]) ([\u0617-\u061a\u0620-\u065f\u066e-\u06d3\u06d5\u06fa-\u06ff\u201d\u2019A-Z])')
+            self.splitsenur2 = re.compile(u' ([.?\u06d4]) ([\)\}\]\'"\u2018\u201c> ]+) ')
         else: 
-            self.splitsenir1 = re.compile(u' ([!.?\u0964\u0965]) ([\u0900-\u0d7f\u201c\u2018A-Z])')
-            self.splitsenir2 = re.compile(u' ([!.?\u0964\u0965]) ([\)\}\]\'"\u2019\u201d> ]+) ')
+            self.splitsenir1 = re.compile(u' ([.?\u0964\u0965]) ([\u0900-\u0d7f\u201c\u2018A-Z])')
+            self.splitsenir2 = re.compile(u' ([.?\u0964\u0965]) ([\)\}\]\'"\u2019\u201d> ]+) ')
 
     def normalize(self,text):
         """
@@ -109,8 +110,8 @@ class tokenize_ind():
         return text
 
     def tokenize(self, text):
-	text = text.decode('utf-8', errors='ignore')
-	text = self.normalize(text)
+        text = text.decode('utf-8', errors='ignore')
+        text = self.normalize(text)
         text = ' %s ' %(text)
         # remove junk characters
         text = self.junk.sub('', text)
@@ -131,14 +132,14 @@ class tokenize_ind():
 
         #keep multiple dots together
         text = self.multidot.sub(lambda m: r' %sMULTI %s' %('DOT'*len(m.group(1)), m.group(2)), text)
-	if self.urd:
-	    #keep multiple dots (urdu-dots) together
-	    text = self.multidot_urd.sub(lambda m: r' %sMULTI %s' %('DOTU'*len(m.group(1)), m.group(2)), text)
-	else:
-	    #keep multiple purna-viram together
-	    text = self.multiviram.sub(lambda m: r' %sMULTI %s' %('PNVM'*len(m.group(1)), m.group(2)), text)
-	    #keep multiple purna deergh-viram together
-	    text = self.multidviram.sub(lambda m: r' %sMULTI %s' %('DGVM'*len(m.group(1)), m.group(2)), text)
+        if self.urd:
+            #keep multiple dots (urdu-dots) together
+            text = self.multidot_urd.sub(lambda m: r' %sMULTI %s' %('DOTU'*len(m.group(1)), m.group(2)), text)
+        else:
+            #keep multiple purna-viram together
+            text = self.multiviram.sub(lambda m: r' %sMULTI %s' %('PNVM'*len(m.group(1)), m.group(2)), text)
+            #keep multiple purna deergh-viram together
+            text = self.multidviram.sub(lambda m: r' %sMULTI %s' %('DGVM'*len(m.group(1)), m.group(2)), text)
 
         #split contractions right (both "'" and "’")
         text = self.nacna.sub(r"\1 \2 \3", text)
@@ -241,23 +242,25 @@ class tokenize_ind():
             text = re.sub(u'([\u0B72-\u0B77])', r' \1 ', text)
         elif self.urd:
             #seperate out urdu full-stop i.e., "۔"
-	    text = re.sub(u'([\u0600-\u06ff])\u06d4 ', ur'\1 \u06d4 ', text)
-	    text = re.sub(u' \u06d4([\u0600-\u06ff])', ur' \u06d4 \1', text)
+            text = re.sub(u'([\u0600-\u06ff])\u06d4 ', ur'\1 \u06d4 ', text)
+            text = re.sub(u' \u06d4([\u0600-\u06ff])', ur' \u06d4 \1', text)
             #seperate out Urdu comma i.e., "،" except for Urdu digits
             text = re.sub(u'([^0-9\u0660-\u0669\u06f0-\u06f9])\u060C', ur'\1 \u060C ', text)
             text = re.sub(u'\u060C([^0-9\u0660-\u0669\u06f0-\u06f9])', ur' \u060C \1', text)
             #separate out on Urdu characters followed by non-Urdu characters and vice-versa
-            text = re.sub(u'([\u0617-\u061a\u0620-\u065f\u066e-\u06d3\u06d5\u06fa-\u06ff\ufe70-\ufeff])' +
-                            u'([^\u0617-\u061a\u0620-\u065f\u066e-\u06d3\u06d5\u06fa-\u06ff\ufe70-\ufeff\u06d4\u066b\u2212-])', r'\1 \2', text)
-            text = re.sub(u'([^\u0617-\u061a\u0620-\u065f\u066e-\u06d3\u06d5\u06fa-\u06ff\ufe70-\ufeff\u06d4\u066b\u2212-])' +
-                            u'([\u0617-\u061a\u0620-\u065f\u066e-\u06d3\u06d5\u06fa-\u06ff\ufe70-\ufeff])', r'\1 \2', text)
+            text = re.sub(u'([\u0617-\u061a\u0620-\u065f\u066e-\u06d3\u06d5\u06fa-\u06ff\ufe70-\ufeff\ufb50-\ufdff])' +
+                            u'([^\u0617-\u061a\u0620-\u065f\u066e-\u06d3\u06d5\u06fa-\u06ff\ufe70-\ufeff\ufb50-\ufdff' +
+                            u'\u06d4\u066b\u2212-])', r'\1 \2', text)
+            text = re.sub(u'([^\u0617-\u061a\u0620-\u065f\u066e-\u06d3\u06d5\u06fa-\u06ff\ufe70-\ufeff\ufb50-\ufdff' + 
+                            u'\u06d4\u066b\u2212-])([\u0617-\u061a\u0620-\u065f\u066e-\u06d3\u06d5\u06fa-\u06ff' + 
+                            u'\ufe70-\ufeff\ufb50-\ufdff])', r'\1 \2', text)
             #separate out on every other special character
             text = re.sub(u'([\u0600-\u0607\u0609\u060a\u060d\u060e\u0610-\u0614\u061b-\u061f\u066a\u066c\u066d\u06dd\u06de\u06e9])',
                             r' \1 ', text)
 
-	#seperate out hyphens 
+        #seperate out hyphens 
         text = self.multihyphen.sub(lambda m: r'%s' %(' '.join('-'*len(m.group(1)))), text) 
-	if self.dev:
+        if self.dev:
             text = re.sub(u'(-?[0-9\u0966-\u096f]-+[0-9\u0966-\u096f]-?){,}',lambda m: r'%s' %(m.group().replace('-', ' - ')), text)
         elif self.ben:
             text = re.sub(u'(-?[0-9\u09e6-\u09ef]-+[0-9\u09e6-\u09ef]-?){,}',lambda m: r'%s' %(m.group().replace('-', ' - ')), text)
@@ -278,48 +281,48 @@ class tokenize_ind():
         elif self.urd:
             text = re.sub(u'(-?[0-9\u0660-\u0669\u06f0-\u06f9]-+[0-9\u0660-\u0669\u06f0-\u06f9]-?){,}',
                             lambda m: r'%s' %(m.group().replace('-', ' - ')), text)
-	text = text.split()
+        text = text.split()
         text = ' '.join(text)
 
         #restore multiple dots, purna virams and deergh virams
         text = self.restoredots.sub(lambda m: r'.%s' %('.'*(len(m.group(2))/3)), text)
-	if self.urd:
-	    text = self.restoreudots.sub(lambda m: u'\u06d4%s' %(u'\u06d4'*(len(m.group(2))/4)), text)
-	else:
-	    text = self.restoreviram.sub(lambda m: u'\u0964%s' %(u'\u0964'*(len(m.group(2))/4)), text)
-	    text = self.restoredviram.sub(lambda m: u'\u0965%s' %(u'\u0965'*(len(m.group(2))/4)), text)
+        if self.urd:
+            text = self.restoreudots.sub(lambda m: u'\u06d4%s' %(u'\u06d4'*(len(m.group(2))/4)), text)
+        else:
+            text = self.restoreviram.sub(lambda m: u'\u0964%s' %(u'\u0964'*(len(m.group(2))/4)), text)
+            text = self.restoredviram.sub(lambda m: u'\u0965%s' %(u'\u0965'*(len(m.group(2))/4)), text)
 
-	#split sentences
-	if self.split_sen:
-	    if self.urd: 
-	        text = self.splitsenur1.sub(r' \1\n\2', text)
-	        text = self.splitsenur2.sub(r' \1 \2\n', text)
-	    else: 
-	        text = self.splitsenir1.sub(r' \1\n\2', text)
-	        text = self.splitsenir2.sub(r' \1 \2\n', text)
-	
-	text = text.encode('utf-8')
+        #split sentences
+        if self.split_sen:
+            if self.urd: 
+                text = self.splitsenur1.sub(r' \1\n\2', text)
+                text = self.splitsenur2.sub(r' \1 \2\n', text)
+            else: 
+                text = self.splitsenir1.sub(r' \1\n\2', text)
+                text = self.splitsenir2.sub(r' \1 \2\n', text)
+        
+        text = text.encode('utf-8')
         return text
 
 if __name__ == '__main__':
     
     lang_help = """select language (3 letter ISO-639 code)
-		Hindi       : hin
-		Urdu	    : urd
-		Telugu      : tel
-		Tamil       : tam
-		Malayalam   : mal
-		Kannada     : kan
-		Bengali     : ben
-		Oriya       : ori
-		Punjabi     : pan
-		Marathi     : mar
-		Nepali      : nep
-		Gujarati    : guj
-		Bodo        : bod
-		Konkani     : kok
-		Assamese    : asm
-		Kashmiri    : kas"""
+                Hindi       : hin
+                Urdu        : urd
+                Telugu      : tel
+                Tamil       : tam
+                Malayalam   : mal
+                Kannada     : kan
+                Bengali     : ben
+                Oriya       : ori
+                Punjabi     : pan
+                Marathi     : mar
+                Nepali      : nep
+                Gujarati    : guj
+                Bodo        : bod
+                Konkani     : kok
+                Assamese    : asm
+                Kashmiri    : kas"""
     languages = "hin urd ben asm guj mal pan tel tam kan ori mar nep bod kok kas".split()
     # parse command line arguments 
     parser = argparse.ArgumentParser(prog="indic_tokenizer", 
