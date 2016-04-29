@@ -110,7 +110,7 @@ class tokenize_ind():
         return text
 
     def tokenize(self, text):
-        text = text.decode('utf-8', errors='ignore')
+        text = text.decode('utf-8', 'ignore')
         text = self.normalize(text)
         text = ' %s ' %(text)
         # remove junk characters
