@@ -1,6 +1,12 @@
 language: python
+
 python:
   - "2.7"
+
+install:
+  - pip install -q argparse coverage coveralls 
+
 script: nosetests
+
 after_success:
   - coveralls
