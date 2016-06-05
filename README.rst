@@ -2,6 +2,8 @@
 indic-tokenizer
 ================
 
+[![Build Status](https://travis-ci.org/ltrc/indic-tokenizer.svg?branch=master)](https://travis-ci.org/ltrc/indic-tokenizer)
+
 Tokenizer for Indian Scripts and Roman Script
 
 Installation
