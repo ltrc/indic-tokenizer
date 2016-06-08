@@ -24,4 +24,4 @@ class TestTokenizer(TestCase):
                 tok = tokenize_ind(split_sen=True, lang=lang)
             with open('%s/%s.txt' % (self.test_dir, lang)) as fp:
                 for line in fp:
-                    tokenized_text = tok.tokenize()
+                    tokenized_text = tok.tokenize(line)
