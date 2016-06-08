@@ -2,10 +2,12 @@
 indic-tokenizer
 ================
 
-|Build Status|
+|Build Status| |Coverage Status|
 
 .. |Build Status| image:: https://travis-ci.org/ltrc/indic-tokenizer.svg?branch=master
    :target: https://travis-ci.org/ltrc/indic-tokenizer
+.. |Coverage Status| image:: https://coveralls.io/repos/github/ltrc/indic-tokenizer/badge.svg?branch=master 
+    :target: https://coveralls.io/github/ltrc/indic-tokenizer?branch=master
 
 Tokenizer for Indian Scripts and Roman Script
 
