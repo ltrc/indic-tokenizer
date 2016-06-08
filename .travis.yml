@@ -5,6 +5,7 @@ python:
 sudo: false
 
 install:
+  - pip install pbr
   - pip install -q argparse coverage coveralls
 
 script:
