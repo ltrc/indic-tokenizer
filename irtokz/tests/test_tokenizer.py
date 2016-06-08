@@ -12,8 +12,7 @@ class TestTokenizer(TestCase):
 
     def setUp(self):
         super(TestTokenizer, self).setUp()
-        self.languages = "eng hin urd ben asm guj mal pan tel tam \
-        kan ori mar nep bod kok kas".split()
+        self.languages = "eng hin urd ben guj mal pan tel tam kan ori".split()
         self.test_dir = os.path.dirname(os.path.abspath(__file__))
 
     def test_(self):
