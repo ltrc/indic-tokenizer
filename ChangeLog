@@ -1,0 +1,43 @@
+CHANGES
+=======
+
+* added coverage coveralls
+* added build status in rst format
+* added build status
+* added coveralls
+* added travis integration
+* Make python2.6 happy
+* added daeonize option
+* sentence split as pipe (|)
+* no sentence splitting at !
+* update
+* readme
+* readme
+* readme
+* readme
+* readme
+* converted into a proper python package
+* update
+* update
+* update
+* compiled regexes for faster tokenization! Updated sentence split rules!
+* compiled regexes for faster tokenization! Updated sentence split rules!
+* compiled regexes for faster tokenization! Updated sentence split rules!
+* compiled regexes for faster tokenization! Updated sentence split rules!
+* compiled regexes for faster tokenization! Updated sentence split rules!
+* compiled regexes for faster tokenization! Updated sentence split rules!
+* compiled regexes for faster tokenization! Updated sentence split rules!
+* compiled regexes for faster tokenization! updated sentence split rules!
+* sentence split rules updated
+* updated sentence split
+* updated sentence boundary identification rules
+* added support for urdu
+* added support for Urdu, updated sentence boundary rules
+* sentence split
+* added support for Urdu
+* sentence tokenization handled
+* sentence tokenization handled
+* initial commit
+* initial commit
+* initial commit
+* Initial commit
