@@ -28,7 +28,7 @@ from .roman_tokenize import tokenize_rom
 __name__ = "Indic Tokenizer"
 __author__ = "Irshad Ahmad"
 __copyright__ = "Copyright (C) 2015-16 Irshad Ahmad"
-__version__ = "1.0.1"
+__version__ = "1.0.2"
 __license__ = "MIT"
 __maintainer__ = "Irshad Ahmad"
 __email__ = "irshad.bhat@research.iiit.ac.in"
