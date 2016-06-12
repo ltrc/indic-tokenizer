@@ -24,3 +24,4 @@ class TestTokenizer(TestCase):
             with open('%s/%s.txt' % (self.test_dir, lang)) as fp:
                 for line in fp:
                     tokenized_text = tok.tokenize(line)
+                    self.assertIsInstance(tokenized_text, str)
