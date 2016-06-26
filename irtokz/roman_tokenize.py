@@ -50,19 +50,21 @@ class tokenize_rom():
         self.notanumc = re.compile(r'([^0-9]),')
         self.cnotanum = re.compile(r',([^0-9])')
         # split contractions right (both "'" and "’")
-        self.numcs = re.compile(ur"([0-9])(['\u2019])s")
+        self.numcs = re.compile(ur"([0-9])'s")
         self.aca = re.compile(
-            ur"([a-zA-Z\u0080-\u024f])(['\u2019])([a-zA-Z\u0080-\u024f])")
+            ur"([a-zA-Z\u0080-\u024f])'([a-zA-Z\u0080-\u024f])")
         self.acna = re.compile(
-            ur"([a-zA-Z\u0080-\u024f])(['\u2019])([^a-zA-Z\u0080-\u024f])")
+            ur"([a-zA-Z\u0080-\u024f])'([^a-zA-Z\u0080-\u024f])")
         self.nacna = re.compile(
-            ur"([^a-zA-Z\u0080-\u024f])(['\u2019])([^a-zA-Z\u0080-\u024f])")
+            ur"([^a-zA-Z\u0080-\u024f])'([^a-zA-Z\u0080-\u024f])")
         self.naca = re.compile(
-            ur"([^a-zA-Z0-9\u0080-\u024f])(['\u2019])([a-zA-Z\u0080-\u024f])")
+            ur"([^a-zA-Z0-9\u0080-\u024f])'([a-zA-Z\u0080-\u024f])")
 
-        # multiple hyphens
+        # split hyphens
         self.multihyphen = re.compile(r'(-+)')
         self.hypheninnun = re.compile(r'(-?[0-9]-+[0-9]-?){,}')
+        self.ch_hyp_noalp = re.compile(r'(.)-([^a-zA-Z])')
+        self.noalp_hyp_ch = re.compile(r'([^a-zA-Z])-(.)')
         # restore multi-dots
         self.restoredots = re.compile(r'(DOT)(\1*)MULTI')
 
@@ -70,12 +72,20 @@ class tokenize_rom():
         if self.split_sen:
             self.splitsenr1 = re.compile(ur' ([.?]) ([A-Z])')
             self.splitsenr2 = re.compile(ur' ([.?]) ([\'" ]+) ([A-Z])')
-            self.splitsenr3 = re.compile(ur' ([.?]) ([\u201c\u2018 ]+ [A-Z])')
-            self.splitsenr4 = re.compile(
-                ur' ([.?]) ([\'"\)\}\]\u2019\u201d> ]+) ([A-Z])')
+            self.splitsenr3 = re.compile(
+                ur' ([.?]) ([\'"\)\}\]> ]+) ([A-Z])')
+
+    def normalize_punkt(self, text):
+        """replace unicode punctuation by ascii"""
+        text = re.sub(u'[\u2010\u2043]', '-', text)  # hyphen
+        text = re.sub(u'[\u2018\u2019]', "'", text)  # single quotes
+        text = re.sub(u'[\u201c\u201d]', '"', text)  # double quotes
+
+        return text
 
     def tokenize(self, text):
         text = text.decode('utf-8', errors='ignore')
+        text = self.normalize_punkt(text)
         text = text.split()
         text = ' '.join(text)
         text = ' %s ' % (text)
@@ -92,7 +102,6 @@ class tokenize_rom():
         # seperate out on unicode currency symbols
         text = self.ucurrency.sub(r' \1 ', text)
 
-        text = text.encode('utf-8')
         # remove ascii junk
         text = self.junk.sub('', text)
         # seperate out all "other" ASCII special characters
@@ -105,16 +114,26 @@ class tokenize_rom():
         text = self.notanumc.sub(r'\1 , ', text)
         text = self.cnotanum.sub(r' , \1', text)
 
-        text = text.decode('utf-8')
         # split contractions right (both "'" and "’")
-        text = self.nacna.sub(r"\1 \2 \3", text)
-        text = self.naca.sub(r"\1 \2 \3", text)
-        text = self.acna.sub(r"\1 \2 \3", text)
-        text = self.aca.sub(r"\1 \2\3", text)
-        text = self.numcs.sub(r"\1 \2s", text)
+        text = self.nacna.sub(r"\1 ' \2", text)
+        text = self.naca.sub(r"\1 ' \2", text)
+        text = self.acna.sub(r"\1 ' \2", text)
+        text = self.aca.sub(r"\1 '\2", text)
+        text = self.numcs.sub(r"\1 's", text)
 
-        text = text.encode('utf-8')
         text = text.replace("''", " ' ' ")
+        # split dots at word beginings
+        text = re.sub(r' (\.+)([^0-9])', r' \1 \2', text)
+
+        # seperate out hyphens
+        text = self.multihyphen.sub(
+            lambda m: r'%s' % (' '.join(m.group(1))),
+            text)
+        text = self.hypheninnun.sub(
+            lambda m: r'%s' % (m.group().replace('-', ' - ')),
+            text)
+        text = self.ch_hyp_noalp.sub(r'\1 - \2', text)
+        text = self.noalp_hyp_ch.sub(r'\1 - \2', text)
 
         # handle non-breaking prefixes
         words = text.split()
@@ -138,13 +157,6 @@ class tokenize_rom():
                     word = dotless + ' .'
             text += "%s " % word
 
-        # seperate out hyphens
-        text = self.multihyphen.sub(lambda m: r'%s' %
-                                    (' '.join('-' * len(m.group(1)))), text)
-        text = self.hypheninnun.sub(
-            lambda m: r'%s' %
-            (m.group().replace(
-                '-', ' - ')), text)
         text = text.split()
         text = ' '.join(text)
         # restore multi-dots
@@ -155,9 +167,7 @@ class tokenize_rom():
         if self.split_sen:
             text = self.splitsenr1.sub(r' \1\n\2', text)
             text = self.splitsenr2.sub(r' \1\n\2 \3', text)
-            text = text.decode('utf-8')
-            text = self.splitsenr3.sub(r' \1\n\2', text)
-            text = self.splitsenr4.sub(r' \1 \2\n\3', text)
+            text = self.splitsenr3.sub(r' \1 \2\n\3', text)
             text = text.encode('utf-8')
 
         return text
