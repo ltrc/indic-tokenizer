@@ -168,9 +168,8 @@ class tokenize_rom():
             text = self.splitsenr1.sub(r' \1\n\2', text)
             text = self.splitsenr2.sub(r' \1\n\2 \3', text)
             text = self.splitsenr3.sub(r' \1 \2\n\3', text)
-            text = text.encode('utf-8')
 
-        return text
+        return text.encode('utf-8')
 
 if __name__ == '__main__':
 
