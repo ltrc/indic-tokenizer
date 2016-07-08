@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 # -*- coding=utf-8 -*-
 
+from __future__ import (division, unicode_literals)
+
 import re
 import os
-import sys
-import argparse
 
 
-class tokenize_rom():
+class RomanTokenizer():
 
     def __init__(self, split_sen=False):
         self.split_sen = split_sen
@@ -19,7 +19,8 @@ class tokenize_rom():
                 if line.startswith('#'):
                     continue
                 if '#NUMERIC_ONLY#' in line:
-                    self.NBP[line.replace('#NUMERIC_ONLY#', '').split()[0]] = 2
+                    line = line.replace('#NUMERIC_ONLY#', '').split()[0]
+                    self.NBP[line] = 2
                 else:
                     self.NBP[line.strip()] = 1
 
@@ -30,17 +31,17 @@ class tokenize_rom():
         # junk characters
         self.junk = re.compile(r'[\x00-\x1f]')
         # Latin-1 supplementary characters
-        self.latin = re.compile(ur'([\xa1-\xbf\xd7\xf7])')
+        self.latin = re.compile(r'([\xa1-\xbf\xd7\xf7])')
         # general unicode punctituations except "’"
-        self.upunct = re.compile(ur'([\u2012-\u2018\u201a-\u206f])')
+        self.upunct = re.compile(r'([\u2012-\u2018\u201a-\u206f])')
         # unicode mathematical operators
-        self.umathop = re.compile(ur'([\u2200-\u2211\u2213-\u22ff])')
+        self.umathop = re.compile(r'([\u2200-\u2211\u2213-\u22ff])')
         # unicode fractions
-        self.ufrac = re.compile(ur'([\u2150-\u2160])')
+        self.ufrac = re.compile(r'([\u2150-\u2160])')
         # unicode superscripts and subscripts
-        self.usupsub = re.compile(ur'([\u2070-\u209f])')
+        self.usupsub = re.compile(r'([\u2070-\u209f])')
         # unicode currency symbols
-        self.ucurrency = re.compile(ur'([\u20a0-\u20cf])')
+        self.ucurrency = re.compile(r'([\u20a0-\u20cf])')
         # all "other" ASCII special characters
         self.specascii = re.compile(r'([\\!@#$%^&*()_+={\[}\]|";:<>?`~/])')
 
@@ -50,15 +51,15 @@ class tokenize_rom():
         self.notanumc = re.compile(r'([^0-9]),')
         self.cnotanum = re.compile(r',([^0-9])')
         # split contractions right (both "'" and "’")
-        self.numcs = re.compile(ur"([0-9])'s")
+        self.numcs = re.compile(r"([0-9])'s")
         self.aca = re.compile(
-            ur"([a-zA-Z\u0080-\u024f])'([a-zA-Z\u0080-\u024f])")
+            r"([a-zA-Z\u0080-\u024f])'([a-zA-Z\u0080-\u024f])")
         self.acna = re.compile(
-            ur"([a-zA-Z\u0080-\u024f])'([^a-zA-Z\u0080-\u024f])")
+            r"([a-zA-Z\u0080-\u024f])'([^a-zA-Z\u0080-\u024f])")
         self.nacna = re.compile(
-            ur"([^a-zA-Z\u0080-\u024f])'([^a-zA-Z\u0080-\u024f])")
+            r"([^a-zA-Z\u0080-\u024f])'([^a-zA-Z\u0080-\u024f])")
         self.naca = re.compile(
-            ur"([^a-zA-Z0-9\u0080-\u024f])'([a-zA-Z\u0080-\u024f])")
+            r"([^a-zA-Z0-9\u0080-\u024f])'([a-zA-Z\u0080-\u024f])")
 
         # split hyphens
         self.multihyphen = re.compile(r'(-+)')
@@ -70,21 +71,20 @@ class tokenize_rom():
 
         # split sentences
         if self.split_sen:
-            self.splitsenr1 = re.compile(ur' ([.?]) ([A-Z])')
-            self.splitsenr2 = re.compile(ur' ([.?]) ([\'" ]+) ([A-Z])')
+            self.splitsenr1 = re.compile(r' ([.?]) ([A-Z])')
+            self.splitsenr2 = re.compile(r' ([.?]) ([\'"\(\{\[< ]+) ([A-Z])')
             self.splitsenr3 = re.compile(
-                ur' ([.?]) ([\'"\)\}\]> ]+) ([A-Z])')
+                r' ([.?]) ([\'"\)\}\]> ]+) ([A-Z])')
 
     def normalize_punkt(self, text):
         """replace unicode punctuation by ascii"""
-        text = re.sub(u'[\u2010\u2043]', '-', text)  # hyphen
-        text = re.sub(u'[\u2018\u2019]', "'", text)  # single quotes
-        text = re.sub(u'[\u201c\u201d]', '"', text)  # double quotes
+        text = re.sub('[\u2010\u2043]', '-', text)  # hyphen
+        text = re.sub('[\u2018\u2019]', "'", text)  # single quotes
+        text = re.sub('[\u201c\u201d]', '"', text)  # double quotes
 
         return text
 
     def tokenize(self, text):
-        text = text.decode('utf-8', errors='ignore')
         text = self.normalize_punkt(text)
         text = text.split()
         text = ' '.join(text)
@@ -161,7 +161,8 @@ class tokenize_rom():
         text = ' '.join(text)
         # restore multi-dots
         text = self.restoredots.sub(lambda m: r'.%s' %
-                                    ('.' * (len(m.group(2)) / 3)), text)
+                                    ('.' * int((len(m.group(2)) / 3))),
+                                    text)
 
         # split sentences
         if self.split_sen:
@@ -169,42 +170,4 @@ class tokenize_rom():
             text = self.splitsenr2.sub(r' \1\n\2 \3', text)
             text = self.splitsenr3.sub(r' \1 \2\n\3', text)
 
-        return text.encode('utf-8')
-
-if __name__ == '__main__':
-
-    # parse command line arguments
-    parser = argparse.ArgumentParser(
-        prog="roman_tokenizer",
-        description="Tokenizer for Roman-Scripts")
-    parser.add_argument(
-        '--i',
-        metavar='input',
-        dest="INFILE",
-        type=argparse.FileType('r'),
-        default=sys.stdin,
-        help="<input-file>")
-    parser.add_argument(
-        '--s',
-        dest='split_sen',
-        action='store_true',
-        help="set this flag for splittting on sentence boundaries")
-    parser.add_argument(
-        '--o',
-        metavar='output',
-        dest="OUTFILE",
-        type=argparse.FileType('w'),
-        default=sys.stdout,
-        help="<output-file>")
-    args = parser.parse_args()
-
-    # initialize convertor object
-    tzr = tokenize_rom(split_sen=args.split_sen)
-    # convert data
-    for line in args.INFILE:
-        line = tzr.tokenize(line)
-        args.OUTFILE.write('%s\n' % line)
-
-    # close files
-    args.INFILE.close()
-    args.OUTFILE.close()
+        return text
