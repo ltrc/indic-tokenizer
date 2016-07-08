@@ -15,20 +15,26 @@ Distributed under MIT license
 
 from __future__ import print_function
 
+import io
 import sys
+import codecs
 import socket
 import argparse
-import StringIO
 import threading
 import multiprocessing
 
-from .indic_tokenize import tokenize_ind
-from .roman_tokenize import tokenize_rom
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
+
+from .indic_tokenize import IndicTokenizer
+from .roman_tokenize import RomanTokenizer
 
 __name__ = "Indic Tokenizer"
 __author__ = "Irshad Ahmad"
 __copyright__ = "Copyright (C) 2015-16 Irshad Ahmad"
-__version__ = "1.0.2"
+__version__ = "1.0.3"
 __license__ = "MIT"
 __maintainer__ = "Irshad Ahmad"
 __email__ = "irshad.bhat@research.iiit.ac.in"
@@ -38,104 +44,107 @@ __all__ = ["indic_tokenize", "roman_tokenize"]
 _MAX_BUFFER_SIZE_ = 1024000  # 1MB
 
 
-def processInput(inFD, outFD, tzr):
+def processInput(inFD, outFD, tok):
     # convert data
     for line in inFD:
-        line = tzr.tokenize(line)
+        line = tok.tokenize(line)
         outFD.write('%s\n' % line)
 
 
 class ClientThread(threading.Thread):
 
-    def __init__(self, ip, port, clientsocket, tzr):
+    def __init__(self, ip, port, clientsocket, tok):
         threading.Thread.__init__(self)
-        self.tzr = tzr
+        self.tok = tok
         self.ip = ip
         self.port = port
         self.csocket = clientsocket
-        # print "[+] New thread started for "+ip+":"+str(port)
+        # print("[+] New thread started for "+ip+":"+str(port))
 
     def run(self):
-        # print "Connection from : "+ip+":"+str(port)
+        # print("Connection from : "+ip+":"+str(port))
         data = self.csocket.recv(_MAX_BUFFER_SIZE_)
-        # print "Client(%s:%s) sent : %s"%(self.ip, str(self.port), data)
+        # print("Client(%s:%s) sent : %s"%(self.ip, str(self.port), data))
         fakeInputFile = StringIO.StringIO(data)
         fakeOutputFile = StringIO.StringIO("")
-        processInput(fakeInputFile, fakeOutputFile, self.tzr)
+        processInput(fakeInputFile, fakeOutputFile, self.tok)
         fakeInputFile.close()
         self.csocket.send(fakeOutputFile.getvalue())
         fakeOutputFile.close()
         self.csocket.close()
 
-        # print "Client at "+self.ip+" disconnected..."
+        # print("Client at "+self.ip+" disconnected...")
 
 
 def ind_main():
-    lang_help = """select language (3 letter ISO-639 code)
-        Hindi       : hin
-        Urdu        : urd
-        Telugu      : tel
-        Tamil       : tam
-        Malayalam   : mal
-        Kannada     : kan
-        Bengali     : ben
-        Oriya       : ori
-        Punjabi     : pan
-        Marathi     : mar
-        Nepali      : nep
-        Gujarati    : guj
-        Bodo        : bod
-        Konkani     : kok
-        Assamese    : asm
-        Kashmiri    : kas"""
-    languages = "hin urd ben asm guj mal pan tel tam \
-        kan ori mar nep bod kok kas".split()
+    languages = "hin urd ben asm guj mal pan tel".split()
+    languages += "tam kan ori mar nep bod kok kas".split()
+    lang_help = "select language (3 letter ISO-639 code) {%s}" % (
+        ', '.join(languages))
     # parse command line arguments
     parser = argparse.ArgumentParser(
         prog="indic_tokenizer",
-        description="Tokenizer for Indian Scripts",
-        formatter_class=argparse.RawTextHelpFormatter)
-    parser.add_argument(
-        '--i',
-        metavar='input',
-        dest="INFILE",
-        type=argparse.FileType('r'),
-        default=sys.stdin,
-        help="<input-file>")
-    parser.add_argument(
-        '--l',
-        metavar='language',
-        dest="lang",
-        choices=languages,
-        default='hin',
-        help=lang_help)
-    parser.add_argument(
-        '--s',
-        dest='split_sen',
-        action='store_true',
-        help="set this flag to apply sentence segmentation")
-    parser.add_argument(
-        '--o',
-        metavar='output',
-        dest="OUTFILE",
-        type=argparse.FileType('w'),
-        default=sys.stdout,
-        help="<output-file>")
-    parser.add_argument(
-        '--daemonize',
-        dest='isDaemon',
-        help='Do you want to daemonize me?',
-        action='store_true',
-        default=False)
-    parser.add_argument(
-        '--port',
-        type=int,
-        dest='daemonPort',
-        help='Specify a port number')
+        description="Tokenizer for Indian Scripts")
+    parser.add_argument('-v',
+                        '--version',
+                        action="version",
+                        version="Indic-Tokenizer %s" % __version__)
+    parser.add_argument('-i',
+                        '--input',
+                        metavar='',
+                        dest="infile",
+                        type=str,
+                        help="<input-file>")
+    parser.add_argument('-l',
+                        '--languages',
+                        metavar='',
+                        dest="lang",
+                        choices=languages,
+                        default='hin',
+                        help=lang_help)
+    parser.add_argument('-s',
+                        '--split-sentences',
+                        dest='split_sen',
+                        action='store_true',
+                        help='set this flag to apply'
+                             ' sentence segmentation')
+    parser.add_argument('-o',
+                        '--output',
+                        metavar='',
+                        dest="outfile",
+                        type=str,
+                        help="<output-file>")
+    parser.add_argument('-d',
+                        '--daemonize',
+                        dest='isDaemon',
+                        help='Do you want to daemonize me?',
+                        action='store_true',
+                        default=False)
+    parser.add_argument('-p',
+                        '--port',
+                        type=int,
+                        dest='daemonPort',
+                        help='Specify a port number')
     args = parser.parse_args()
 
+    if args.infile:
+        ifp = io.open(args.infile, encoding='utf-8')
+    else:
+        if sys.version_info[0] >= 3:
+            ifp = codecs.getreader('utf8')(sys.stdin.buffer)
+        else:
+            ifp = codecs.getreader('utf8')(sys.stdin)
+
+    if args.outfile:
+        ofp = io.open(args.outfile, mode='w', encoding='utf-8')
+    else:
+        if sys.version_info[0] >= 3:
+            ofp = codecs.getwriter('utf8')(sys.stdout.buffer)
+        else:
+            ofp = codecs.getwriter('utf8')(sys.stdout)
+
     # initialize convertor object
-    tzr = tokenize_ind(lang=args.lang, split_sen=args.split_sen)
+    tok = IndicTokenizer(lang=args.lang, split_sen=args.split_sen)
 
     # convert data
     if args.isDaemon and args.daemonPort:
@@ -149,59 +158,78 @@ def ind_main():
 
         while True:
             tcpsock.listen(multiprocessing.cpu_count())
-            # print "nListening for incoming connections..."
+            # print("nListening for incoming connections...")
             (clientsock, (ip, port)) = tcpsock.accept()
 
             # pass clientsock to the ClientThread thread object being created
-            newthread = ClientThread(ip, port, clientsock, tzr)
+            newthread = ClientThread(ip, port, clientsock, tok)
             newthread.start()
     else:
-        processInput(args.INFILE, args.OUTFILE, tzr)
+        processInput(ifp, ofp, tok)
 
     # close files
-    args.INFILE.close()
-    args.OUTFILE.close()
+    ifp.close()
+    ofp.close()
 
 
 def rom_main():
     # parse command line arguments
     parser = argparse.ArgumentParser(
         prog="roman_tokenizer",
-        description="Tokenizer for Roman-Script")
-    parser.add_argument(
-        '--i',
-        metavar='input',
-        dest="INFILE",
-        type=argparse.FileType('r'),
-        default=sys.stdin,
-        help="<input-file>")
-    parser.add_argument(
-        '--s',
-        dest='split_sen',
-        action='store_true',
-        help="set this flag to apply sentence segmentation")
-    parser.add_argument(
-        '--o',
-        metavar='output',
-        dest="OUTFILE",
-        type=argparse.FileType('w'),
-        default=sys.stdout,
-        help="<output-file>")
-    parser.add_argument(
-        '--daemonize',
-        dest='isDaemon',
-        help='Do you want to daemonize me?',
-        action='store_true',
-        default=False)
-    parser.add_argument(
-        '--port',
-        type=int,
-        dest='daemonPort',
-        help='Specify a port number')
+        description="Tokenizer for Roman-Scripts")
+    parser.add_argument('-v',
+                        '--version',
+                        action="version",
+                        version="Roman-Tokenizer %s" % __version__)
+    parser.add_argument('-i',
+                        '--input',
+                        metavar='',
+                        dest="infile",
+                        type=str,
+                        help="<input-file>")
+    parser.add_argument('-s',
+                        '--split-sentences',
+                        dest='split_sen',
+                        action='store_true',
+                        help='set this flag to apply'
+                             ' sentence segmentation')
+    parser.add_argument('-o',
+                        '--output',
+                        metavar='',
+                        dest="outfile",
+                        type=str,
+                        help="<output-file>")
+    parser.add_argument('-d',
+                        '--daemonize',
+                        dest='isDaemon',
+                        help='Do you want to daemonize me?',
+                        action='store_true',
+                        default=False)
+    parser.add_argument('-p',
+                        '--port',
+                        type=int,
+                        dest='daemonPort',
+                        help='Specify a port number')
     args = parser.parse_args()
 
+    if args.infile:
+        ifp = io.open(args.infile, encoding='utf-8')
+    else:
+        if sys.version_info[0] >= 3:
+            ifp = codecs.getreader('utf8')(sys.stdin.buffer)
+        else:
+            ifp = codecs.getreader('utf8')(sys.stdin)
+
+    if args.outfile:
+        ofp = io.open(args.outfile, mode='w', encoding='utf-8')
+    else:
+        if sys.version_info[0] >= 3:
+            ofp = codecs.getwriter('utf8')(sys.stdout.buffer)
+        else:
+            ofp = codecs.getwriter('utf8')(sys.stdout)
+
     # initialize convertor object
-    tzr = tokenize_rom(split_sen=args.split_sen)
+    tok = RomanTokenizer(split_sen=args.split_sen)
 
     # convert data
     if args.isDaemon and args.daemonPort:
@@ -215,19 +243,15 @@ def rom_main():
 
         while True:
             tcpsock.listen(multiprocessing.cpu_count())
-            # print "nListening for incoming connections..."
+            # print("nListening for incoming connections...")
             (clientsock, (ip, port)) = tcpsock.accept()
 
             # pass clientsock to the ClientThread thread object being created
-            newthread = ClientThread(ip, port, clientsock, tzr)
+            newthread = ClientThread(ip, port, clientsock, tok)
             newthread.start()
     else:
-        processInput(args.INFILE, args.OUTFILE, tzr)
+        processInput(ifp, ofp, tok)
 
     # close files
-    args.INFILE.close()
-    args.OUTFILE.close()
-
-if __name__ == '__main__':
-    rom_main()
-    # ind_main()
+    ifp.close()
+    ofp.close()
