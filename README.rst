@@ -11,6 +11,8 @@ indic-tokenizer
 
 Tokenizer for Indian Scripts and Roman Script
 
+-----------
+
 Installation
 ============
 
@@ -73,7 +75,7 @@ b. Roman Tokenizer:
     --o output  <output-file>
     --s         set this flag to apply sentence segmentation
 
-.. code:: bash
+.. code-block:: bash
 
     echo "The real question should be: does it matter at all? The Vegas horse-race aspect of the Oscars is, of course, irresistible, but apart from that, what meaning, if any, does the contest really have? Does it tell us anything about the movies nominated, or about film culture in general?" | rom-tokz --s
     The real question should be : does it matter at all ?
@@ -83,10 +85,10 @@ b. Roman Tokenizer:
 2. Using python:
 ----------------
 
-.. code:: python
+.. code-block:: python
 
-    >>> from irtokz import tokenize_rom
-    >>> tok = tokenize_rom(split_sen=True)
+    >>> from irtokz import RomanTokenizer
+    >>> tok = RomanTokenizer(split_sen=True)
     >>> text = """The first act of the film introduces the protagonists, a woman named Su-jin and a man named Chul-soo. The movie highlights their accidental meeting, followed by their subsequent courting despite their difference in social status that should have kept them apart. Kim Su-jin is a 27-year-old fashion designer, spurned by her lover, a colleague who was also a married man. Depressed, she goes to a convenience store, where she bumps into a tall, handsome man with whom she has a slight misunderstanding. Following that, she returns home and, receiving her father's forgiveness, decides to start life afresh.
     ... 
     ... One day while accompanying her father, who is the CEO of a construction firm, she coincidentally meets the man whom she earlier bumped into at the convenience store. He is Choi Chul-soo, the construction site's foreman who is studying to become an architect. Though he initially appears like a rough and dirty construction worker, Chul-soo exudes sheer masculinity in its most basic physical form. Su-jin instantly takes a liking to Chul-soo and actively courts him. There are many sweet events that take place in the occurrence of their courtship, eventually leading to their marriage.
@@ -118,8 +120,8 @@ b. Roman Tokenizer:
     At the end of the film , Chul-soo reenacts the first time they met in the convenience store , with all of Su-jin 's friends and family there .
     In the final scene , Su-jin is riding in a car beside her husband at sunset , and he tells her , " I love you . "
     >>> 
-    >>> from irtokz import tokenize_ind
-    >>> tok = tokenize_ind(lang='hin', split_sen=True)
+    >>> from irtokz import IndicTokenizer
+    >>> tok = IndicTokenizer(lang='hin', split_sen=True)
     >>> text = """22 साल के लंबे इंतजार के बाद आखिरकार हॉलीवुड स्टार लियोनार्डो डिकैप्रियो को अपनी पहली ऑस्कर ट्रॉफी मिल चुकी है। उन्हें ये अवॉर्ड अपनी फिल्म ‘द रेवेनेंट’ में ह्यूज ग्लास के किरदार के लिए मिला, लेकिन उनके के लिए रोल निभाना आसान नहीं था। फिल्म एक सीन के लिए लियोनार्डो को भैंस का कच्चा लीवर खाना पड़ा था। जबकि असल जिंदगी में वो पूरी तरह शाकाहारी हैं। हालांकि इस सीन के लिए पहले लियोनार्डो को मांस जैसे दिखने वाली चीज दी गई थी, लेकिन उन्हें लगा कि ऐसा करना गलत होगा। फिल्म के लिए इम्पोर्ट की गई चीटियां...
     ... फिल्म की शूटिंग के बाद प्रोड्यूसर्स ने ये राज खोला कि एक पर्टीकुलर सीन के लिए उन्हें ढेर सारी चीटियों की जरूरत थी, जो कैलगरी जैसे ठंडे इलाके में नहीं थी। इसलिए उन्होंने औरिगन और ओंटारियो (अमेरिका) से चीटियां मंगवाई। मगर मौसम में बदलाव की वजह से ये चीटियां रास्ते में ही मर गईं। बाद में उन्हें फिर से दोबारा चीटियां मंगवानी पड़ीं।
     ... """
