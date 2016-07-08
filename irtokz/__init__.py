@@ -122,6 +122,7 @@ def ind_main():
                         default=False)
     parser.add_argument('-p',
                         '--port',
+                        metavar='',
                         type=int,
                         dest='daemonPort',
                         help='Specify a port number')
