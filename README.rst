@@ -11,8 +11,6 @@ indic-tokenizer
 
 Tokenizer for Indian Scripts and Roman Script
 
------------
-
 Installation
 ============
 
@@ -41,39 +39,30 @@ a. Indic Tokenizer:
 
 .. parsed-literal::
 
-    ind-tokz --i inputfile --o outputfile --l hin
+    ind-tokz -i inputfile -o outputfile -l hin -s
 
-    --i input     <input-file>
-    --o output    <output-file>
-    --s           set this flag to apply sentence segmentation 
-    --l language  select language (3 letter ISO-639 code)
-		    Hindi       : hin
-		    Urdu        : urd
-		    Telugu      : tel
-		    Tamil       : tam
-		    Malayalam   : mal
-		    Kannada     : kan
-		    Bengali     : ben
-		    Oriya       : ori
-		    Punjabi     : pan
-		    Marathi     : mar
-		    Nepali      : nep
-		    Gujarati    : guj
-		    Bodo        : bod
-		    Konkani     : kok
-		    Assamese    : asm
-		    Kashmiri    : kas
+    -i, --input             <input-file>
+    -l, --languages         select language (3 letter ISO-639 code) {hin, urd,
+                            ben, asm, guj, mal, pan, tel, tam, kan, ori, mar, nep,
+                            bod, kok, kas}
+    -s, --split-sentences   set this flag to apply sentence segmentation
+    -o, --output            <output-file>
+    -d, --daemonize         Do you want to daemonize me?
+    -p, --port              Specify a port number
+
 
 b. Roman Tokenizer:
 ^^^^^^^^^^^^^^^^^^^
 
 .. parsed-literal::
 
-    rom-tokz --i inputfile --o outputfile     
+    rom-tokz -i inputfile -o outputfile --split-sentences
 
-    --i input   <input-file>
-    --o output  <output-file>
-    --s         set this flag to apply sentence segmentation
+    -i, --input             <input-file>
+    -s, --split-sentences   set this flag to apply sentence segmentation
+    -o, --output            <output-file>
+    -d, --daemonize         Do you want to daemonize me?
+    -p, --port              Specify a port number
 
 .. code-block:: bash
 
