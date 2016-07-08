@@ -3,7 +3,7 @@
 
 import io
 import os
-import sys
+import six
 
 from testtools import TestCase
 from irtokz import RomanTokenizer
@@ -27,7 +27,4 @@ class TestTokenizer(TestCase):
                          encoding='utf-8') as fp:
                 for line in fp:
                     tokenized_text = tok.tokenize(line)
-                    if sys.version_info[0] >= 3:
-                        self.assertIsInstance(tokenized_text, str)
-                    else:
-                        self.assertIsInstance(tokenized_text, unicode)
+                    self.assertIsInstance(tokenized_text, six.text_type)
