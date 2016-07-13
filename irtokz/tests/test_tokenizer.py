@@ -6,8 +6,7 @@ import os
 import six
 
 from testtools import TestCase
-from irtokz import RomanTokenizer
-from irtokz import IndicTokenizer
+from irtokz import IndicTokenizer, RomanTokenizer, parse_args
 
 
 class TestTokenizer(TestCase):
@@ -17,7 +16,7 @@ class TestTokenizer(TestCase):
         self.languages = "eng hin urd ben guj mal pan tel tam kan ori".split()
         self.test_dir = os.path.dirname(os.path.abspath(__file__))
 
-    def test_(self):
+    def test_tokenizer(self):
         for lang in self.languages:
             if lang == 'eng':
                 tok = RomanTokenizer(split_sen=True)
@@ -28,3 +27,17 @@ class TestTokenizer(TestCase):
                 for line in fp:
                     tokenized_text = tok.tokenize(line)
                     self.assertIsInstance(tokenized_text, six.text_type)
+
+    def test_parser(self):
+        parser = parse_args(['--input', 'path/to/input_file',
+                             '--output', 'path/to/output_file',
+                             '--language', 'kas',
+                             '--split-sentences',
+                             '--daemonize',
+                             '--port', '5000'])
+        self.assertEqual(parser.infile, 'path/to/input_file')
+        self.assertEqual(parser.outfile, 'path/to/output_file')
+        self.assertEqual(parser.lang, 'kas')
+        self.assertTrue(parser.split_sen)
+        self.assertTrue(parser.isDaemon)
+        self.assertEqual(parser.daemonPort, 5000)
