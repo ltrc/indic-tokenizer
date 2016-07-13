@@ -14,16 +14,11 @@ class IndicTokenizer():
         self.split_sen = split_sen
         file_path = os.path.dirname(os.path.abspath(__file__))
 
-        self.ben = lang in ["ben", "asm"]
         self.urd = lang in ['urd', 'kas']
-        self.dev = lang in ["hin", "mar", "nep", "bod", "kok"]
-        self.tam = lang == 'tam'
-        self.tel = lang == 'tel'
-        self.mal = lang == 'mal'
-        self.kan = lang == 'kan'
-        self.guj = lang == 'guj'
-        self.pan = lang == 'pan'
-        self.ori = lang == 'ori'
+        if lang == 'asm':
+            self.lang = 'ben'
+        if lang in ["mar", "nep", "bod", "kok"]:
+            self.lang = 'hin'
 
         # load nonbreaking prefixes from file
         self.NBP = dict()
@@ -153,6 +148,41 @@ class IndicTokenizer():
             text += "%s " % word
         return ' %s ' % text
 
+    def tokenize_by_script(self, text, digits, letters,
+                           lang, special_ch=''):
+        if lang != self.lang:
+            return text
+        # seperate out "," except for Indic and Ascii digits
+        text = re.sub('([^0-9%s]),' % digits, r'\1 , ', text)
+        text = re.sub(',([^0-9%s])' % digits, r' , \1', text)
+        # separate out on Indic letters followed by non-Indic letters
+        text = re.sub(
+            '([%s])([^%s-])' % (letters, letters),
+            r'\1 \2',
+            text)
+        text = re.sub(
+            '([^%s-])([%s])' % (letters, letters),
+            r'\1 \2',
+            text)
+        # seperate out Indic special chars
+        if special_ch:
+            text = re.sub('([%s])' % special_ch, r' \1 ', text)
+        # separate out hyphens
+        text = re.sub(
+            '(-?[0-9%s]-+[0-9%s]-?){,}' % (digits, digits),
+            lambda m: r'%s' % (m.group().replace('-', ' - ')),
+            text)
+        # separate out hyphens not in between alphabets
+        text = re.sub(
+            r'(.)-([^a-zA-Z%s])' % letters,
+            r'\1 - \2',
+            text)
+        text = re.sub(
+            r'([^a-zA-Z%s])-(.)' % letters,
+            r'\1 - \2',
+            text)
+        return text
+
     def tokenize(self, text):
         text = self.normalize(text)
         text = ' %s ' % (text)
@@ -203,283 +233,32 @@ class IndicTokenizer():
         # handle non-breaking prefixes
         text = self.tokenize_prefixes(text)
 
-        if self.dev:
-            # seperate out "," except for Hindi and Ascii digits
-            text = re.sub('([^0-9\u0966-\u096f]),', r'\1 , ', text)
-            text = re.sub(',([^0-9\u0966-\u096f])', r' , \1', text)
-            # separate out on Hindi characters followed by non-Hindi characters
-            # or purna viram or deergh viram and vice-versa
-            text = re.sub(
-                '([\u0900-\u0963\u0970-\u097f])'
-                '([^\u0900-\u0963\u0970-\u097f-])',
-                r'\1 \2',
-                text)
-            text = re.sub(
-                '([^\u0900-\u0963\u0970-\u097f-])'
-                '([\u0900-\u0963\u0970-\u097f])',
-                r'\1 \2',
-                text)
-            # separate out hyphens
-            text = re.sub(
-                '(-?[0-9\u0966-\u096f]-+[0-9\u0966-\u096f]-?){,}',
-                lambda m: r'%s' % (m.group().replace('-', ' - ')),
-                text)
-            text = re.sub(
-                r'(.)-([^a-zA-Z\u0900-\u0963\u0970-\u097f])',
-                r'\1 - \2',
-                text)
-            text = re.sub(
-                r'([^a-zA-Z\u0900-\u0963\u0970-\u097f])-(.)',
-                r'\1 - \2',
-                text)
-
-        elif self.ben:
-            # seperate out "," except for Bengali and Ascii digits
-            text = re.sub('([^0-9\u09e6-\u09ef]),', r'\1 , ', text)
-            text = re.sub(',([^0-9\u09e6-\u09ef])', r' , \1', text)
-            # separate out on Bengali characters followed by non-Bengali
-            # characters or purna viram or deergh viram and vice-versa
-            text = re.sub(
-                '([\u0980-\u09e3\u09f0-\u09ff])'
-                '([^\u0980-\u09e3\u09f0-\u09ff-])',
-                r'\1 \2',
-                text)
-            text = re.sub(
-                '([^\u0980-\u09e3\u09f0-\u09ff-])'
-                '([\u0980-\u09e3\u09f0-\u09ff])',
-                r'\1 \2',
-                text)
-            # seperate out Bengali special chars (currency signs, BENGALI
-            # ISSHAR)
-            text = re.sub('([\u09f2\u09f3\u09fa\u09fb])', r' \1 ', text)
-            # separate out hyphens
-            text = re.sub(
-                '(-?[0-9\u09e6-\u09ef]-+[0-9\u09e6-\u09ef]-?){,}',
-                lambda m: r'%s' % (m.group().replace('-', ' - ')),
-                text)
-            text = re.sub(
-                r'(.)-([^a-zA-Z\u0980-\u09e3\u09f0-\u09ff])',
-                r'\1 - \2',
-                text)
-            text = re.sub(
-                r'([^a-zA-Z\u0980-\u09e3\u09f0-\u09ff])-(.)',
-                r'\1 - \2',
-                text)
-        elif self.guj:
-            # seperate out "," except for Gujrati and Ascii digits
-            text = re.sub('([^0-9\u0ae6-\u0aef]),', r'\1 , ', text)
-            text = re.sub(',([^0-9\u0ae6-\u0aef])', r' , \1', text)
-            # separate out on Gujrati characters followed by non-Gujrati
-            # characters or purna viram or deergh viram and vice-versa
-            text = re.sub(
-                '([\u0A80-\u0AE3\u0Af0-\u0Aff])'
-                '([^\u0A80-\u0AE3\u0Af0-\u0Aff-])',
-                r'\1 \2',
-                text)
-            text = re.sub(
-                '([^\u0A80-\u0AE3\u0Af0-\u0Aff-])'
-                '([\u0A80-\u0AE3\u0Af0-\u0Aff])',
-                r'\1 \2',
-                text)
-            # seperate out Gujurati special chars (currency signs, GUJARATI OM)
-            text = re.sub('([\u0AD0\u0AF1])', r' \1 ', text)
-            # separate out hyphens
-            text = re.sub(
-                '(-?[0-9\u0ae6-\u0aef]-+[0-9\u0ae6-\u0aef]-?){,}',
-                lambda m: r'%s' % (m.group().replace('-', ' - ')),
-                text)
-            text = re.sub(
-                r'(.)-([^a-zA-Z\u0A80-\u0AE3\u0Af0-\u0Aff])',
-                r'\1 - \2',
-                text)
-            text = re.sub(
-                r'([^a-zA-Z\u0A80-\u0AE3\u0Af0-\u0Aff])-(.)',
-                r'\1 - \2',
-                text)
-        elif self.mal:
-            # seperate out "," except for Malayalam and Ascii digits
-            text = re.sub('([^0-9\u0d66-\u0d6f]),', r'\1 , ', text)
-            text = re.sub(',([^0-9\u0d66-\u0d6f])', r' , \1', text)
-            # separate out on Malayalam characters followed by non-Malayalam
-            # characters or purna viram or deergh viram and vice-versa
-            text = re.sub(
-                '([\u0D00-\u0D63\u0D73-\u0D7f])'
-                '([^\u0D00-\u0D63\u0D73-\u0D7f-])',
-                r'\1 \2',
-                text)
-            text = re.sub(
-                '([^\u0D00-\u0D63\u0D73-\u0D7f-])'
-                '([\u0D00-\u0D63\u0D73-\u0D7f])',
-                r'\1 \2',
-                text)
-            # seperate out Malayalam fraction symbols
-            text = re.sub('([\u0d73\u0d74\u0d75])', r' \1 ', text)
-            # separate hyphens in between numerals
-            text = re.sub(
-                '(-?[0-9\u0d66-\u0D72]-+[0-9\u0d66-\u0D72]-?){,}',
-                lambda m: r'%s' % (m.group().replace('-', ' - ')),
-                text)
-            text = re.sub(
-                r'(.)-([^a-zA-Z\u0D00-\u0D63\u0D73-\u0D7f])',
-                r'\1 - \2',
-                text)
-            text = re.sub(
-                r'([^a-zA-Z\u0D00-\u0D63\u0D73-\u0D7f])-(.)',
-                r'\1 - \2',
-                text)
-        elif self.pan:
-            # seperate out "," except for Punjabi and Ascii digits
-            text = re.sub('([^0-9\u0a66-\u0a6f]),', r'\1 , ', text)
-            text = re.sub(',([^0-9\u0a66-\u0a6f])', r' , \1', text)
-            # separate out on Punjabi characters followed by non-Punjabi
-            # characters or purna viram or deergh viram and vice-versa
-            text = re.sub(
-                '([\u0A00-\u0A63\u0A70-\u0A7f])'
-                '([^\u0A00-\u0A63\u0A70-\u0A7f-])',
-                r'\1 \2',
-                text)
-            text = re.sub(
-                '([^\u0A00-\u0A63\u0A70-\u0A7f-])'
-                '([\u0A00-\u0A63\u0A70-\u0A7f])',
-                r'\1 \2',
-                text)
-            # separate hyphens in between numerals
-            text = re.sub(
-                '(-?[0-9\u0a66-\u0a6f]-+[0-9\u0a66-\u0a6f]-?){,}',
-                lambda m: r'%s' % (m.group().replace('-', ' - ')),
-                text)
-            text = re.sub(
-                r'(.)-([^a-zA-Z\u0A00-\u0A63\u0A70-\u0A7f])',
-                r'\1 - \2',
-                text)
-            text = re.sub(
-                r'([^a-zA-Z\u0A00-\u0A63\u0A70-\u0A7f])-(.)',
-                r'\1 - \2',
-                text)
-        elif self.tel:
-            # seperate out "," except for Telugu and Ascii digits
-            text = re.sub('([^0-9\u0c66-\u0c6f]),', r'\1 , ', text)
-            text = re.sub(',([^0-9\u0c66-\u0c6f])', r' , \1', text)
-            # separate out on Telugu characters followed by non-Telugu
-            # characters or purna viram or deergh viram and vice-versa
-            text = re.sub(
-                '([\u0c00-\u0c63\u0c70-\u0c7f])'
-                '([^\u0c00-\u0c63\u0c70-\u0c7f-])',
-                r'\1 \2',
-                text)
-            text = re.sub(
-                '([^\u0c00-\u0c63\u0c70-\u0c7f-])'
-                '([\u0c00-\u0c63\u0c70-\u0c7f])',
-                r'\1 \2',
-                text)
-            # separate out Telugu fractions and weights
-            text = re.sub('([\u0c78-\u0c7f])', r' \1 ', text)
-            # separate hyphens in between numerals
-            text = re.sub(
-                '(-?[0-9\u0c66-\u0c6f]-+[0-9\u0c66-\u0c6f]-?){,}',
-                lambda m: r'%s' % (m.group().replace('-', ' - ')),
-                text)
-            text = re.sub(
-                r'(.)-([^a-zA-Z\u0c00-\u0c63\u0c70-\u0c7f])',
-                r'\1 - \2',
-                text)
-            text = re.sub(
-                r'([^a-zA-Z\u0c00-\u0c63\u0c70-\u0c7f])-(.)',
-                r'\1 - \2',
-                text)
-        elif self.tam:
-            # seperate out "," except for Tamil and Ascii digits
-            text = re.sub('([^0-9\u0be6-\u0bef]),', r'\1 , ', text)
-            text = re.sub(',([^0-9\u0be6-\u0bef])', r' , \1', text)
-            # separate out on Tamil characters followed by non-Tamil characters
-            # or purna viram or deergh viram and vice-versa
-            text = re.sub(
-                '([\u0B80-\u0Be3\u0Bf3-\u0Bff])'
-                '([^\u0B80-\u0Be3\u0Bf3-\u0Bff-])',
-                r'\1 \2',
-                text)
-            text = re.sub(
-                '([^\u0B80-\u0Be3\u0Bf3-\u0Bff-])'
-                '([\u0B80-\u0Be3\u0Bf3-\u0Bff])',
-                r'\1 \2',
-                text)
-            # seperate out Tamil special symbols (calendrical, clerical,
-            # currency signs etc.)
-            text = re.sub('([\u0bd0\u0bf3-\u0bff])', r' \1 ', text)
-            # separate hyphens in between numerals
-            text = re.sub(
-                '(-?[0-9\u0be6-\u0bf2]-+[0-9\u0be6-\u0bf2]-?){,}',
-                lambda m: r'%s' % (m.group().replace('-', ' - ')),
-                text)
-            text = re.sub(
-                r'(.)-([^a-zA-Z\u0B80-\u0Be3\u0Bf3-\u0Bff])',
-                r'\1 - \2',
-                text)
-            text = re.sub(
-                r'([^a-zA-Z\u0B80-\u0Be3\u0Bf3-\u0Bff])-(.)',
-                r'\1 - \2',
-                text)
-        elif self.kan:
-            # seperate out "," except for Kanadda and Ascii digits
-            text = re.sub('([^0-9\u0ce6-\u0cef]),', r'\1 , ', text)
-            text = re.sub(',([^0-9\u0ce6-\u0cef])', r' , \1', text)
-            # separate out on Kanadda characters followed by non-Kanadda
-            # characters or purna viram or deergh viram and vice-versa
-            text = re.sub(
-                '([\u0C80-\u0Ce3\u0Cf1-\u0Cff])'
-                '([^\u0C80-\u0Ce3\u0Cf1-\u0Cff-])',
-                r'\1 \2',
-                text)
-            text = re.sub(
-                '([^\u0C80-\u0Ce3\u0Cf1-\u0Cff]-)'
-                '([\u0C80-\u0Ce3\u0Cf1-\u0Cff])',
-                r'\1 \2',
-                text)
-            # separate hyphens in between numerals
-            text = re.sub(
-                '(-?[0-9\u0ce6-\u0cef]-+[0-9\u0ce6-\u0cef]-?){,}',
-                lambda m: r'%s' % (m.group().replace('-', ' - ')),
-                text)
-            text = re.sub(
-                r'(.)-([^a-zA-Z\u0C80-\u0Ce3\u0Cf1-\u0Cff])',
-                r'\1 - \2',
-                text)
-            text = re.sub(
-                r'([^a-zA-Z\u0C80-\u0Ce3\u0Cf1-\u0Cff])-(.)',
-                r'\1 - \2',
-                text)
-        elif self.ori:
-            # seperate out "," except for Oriya and Ascii digits
-            text = re.sub('([^0-9\u0b66-\u0b6f]),', r'\1 , ', text)
-            text = re.sub(',([^0-9\u0b66-\u0b6f])', r' , \1', text)
-            # separate out on Oriya characters followed by non-Oriya characters
-            # or purna viram or deergh viram and vice-versa
-            text = re.sub(
-                '([\u0B00-\u0B63\u0B70-\u0B7f])'
-                '([^\u0B00-\u0B63\u0B70-\u0B7f-])',
-                r'\1 \2',
-                text)
-            text = re.sub(
-                '([^\u0B00-\u0B63\u0B70-\u0B7f-])'
-                '([\u0B00-\u0B63\u0B70-\u0B7f])',
-                r'\1 \2',
-                text)
-            # seperate out Oriya fraction symbols
-            text = re.sub('([\u0B72-\u0B77])', r' \1 ', text)
-            # separate hyphens in between numerals
-            text = re.sub(
-                '(-?[0-9\u0b66-\u0b6f]-+[0-9\u0b66-\u0b6f]-?){,}',
-                lambda m: r'%s' % (m.group().replace('-', ' - ')),
-                text)
-            text = re.sub(
-                r'(.)-([^a-zA-Z\u0B00-\u0B63\u0B70-\u0B7f])',
-                r'\1 - \2',
-                text)
-            text = re.sub(
-                r'([^a-zA-Z\u0B00-\u0B63\u0B70-\u0B7f])-(.)',
-                r'\1 - \2',
-                text)
-        elif self.urd:
+        # tokenize by language script
+        text = self.tokenize_by_script(text, '\u0966-\u096f',
+                                       '\u0900-\u0963\u0970-\u097f', 'hin')
+        text = self.tokenize_by_script(text, '\u09e6-\u09ef',
+                                       '\u0980-\u09e3\u09f0-\u09ff', 'ben',
+                                       special_ch='\u09f2\u09f3\u09fa\u09fb')
+        text = self.tokenize_by_script(text, '\u0ae6-\u0aef',
+                                       '\u0A80-\u0AE3\u0Af0-\u0Aff', 'guj',
+                                       special_ch='\u0AD0\u0AF1')
+        text = self.tokenize_by_script(text, '\u0d66-\u0d6f',
+                                       '\u0D00-\u0D63\u0D73-\u0D7f', 'mal',
+                                       special_ch='\u0d73\u0d74\u0d75')
+        text = self.tokenize_by_script(text, '\u0a66-\u0a6f',
+                                       '\u0A00-\u0A63\u0A70-\u0A7f', 'pan')
+        text = self.tokenize_by_script(text, '\u0c66-\u0c6f',
+                                       '\u0c00-\u0c63\u0c70-\u0c7f', 'tel',
+                                       special_ch='\u0c78-\u0c7f')
+        text = self.tokenize_by_script(text, '\u0be6-\u0bef',
+                                       '\u0B80-\u0Be3\u0Bf3-\u0Bff', 'tam',
+                                       special_ch='\u0bd0\u0bf3-\u0bff')
+        text = self.tokenize_by_script(text, '\u0ce6-\u0cef',
+                                       '\u0C80-\u0Ce3\u0Cf1-\u0Cff', 'kan')
+        text = self.tokenize_by_script(text, '\u0b66-\u0b6f',
+                                       '\u0B00-\u0B63\u0B70-\u0B7f', 'ori',
+                                       special_ch='\u0B72-\u0B77')
+        if self.urd:
             # seperate out urdu full-stop i.e., "۔"
             text = re.sub('([\u0600-\u06ff])\u06d4 ', r'\1 \u06d4 ', text)
             text = re.sub(' \u06d4([\u0600-\u06ff])', r' \u06d4 \1', text)
@@ -492,7 +271,7 @@ class IndicTokenizer():
                 '\u060C([^0-9\u0660-\u0669\u06f0-\u06f9])',
                 r' \u060C \1',
                 text)
-            # separate out on Urdu characters followed by non-Urdu characters
+            # separate out on Urdu letters followed by non-Urdu letters
             # and vice-versa
             text = re.sub(
                 '([\u0617-\u061a\u0620-\u065f\u066e-\u06d3\u06d5'
