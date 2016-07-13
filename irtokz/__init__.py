@@ -4,7 +4,7 @@
 """Tokenizer for Indian scripts and Roman script.
 
 This module provides a complete tokenizer for Indian languages
-including Urdu and Kashmiri and Roman script.
+including Urdu, Kashmiri and Roman script.
 
 Copyright (c) 2015-2016 Irshad Ahmad
 <irshad.bhat@research.iiit.ac.in>
@@ -31,15 +31,15 @@ except ImportError:
 from .indic_tokenize import IndicTokenizer
 from .roman_tokenize import RomanTokenizer
 
-__name__ = "Indic Tokenizer"
-__author__ = "Irshad Ahmad"
-__copyright__ = "Copyright (C) 2015-16 Irshad Ahmad"
-__version__ = "1.0.3"
-__license__ = "MIT"
-__maintainer__ = "Irshad Ahmad"
-__email__ = "irshad.bhat@research.iiit.ac.in"
-__status__ = "Beta"
-__all__ = ["indic_tokenize", "roman_tokenize"]
+__name__ = 'Indic Tokenizer'
+__author__ = 'Irshad Ahmad'
+__copyright__ = 'Copyright (C) 2015-16 Irshad Ahmad'
+__version__ = '1.0.3'
+__license__ = 'MIT'
+__maintainer__ = 'Irshad Ahmad'
+__email__ = 'irshad.bhat@research.iiit.ac.in'
+__status__ = 'Beta'
+__all__ = ['indic_tokenize', 'roman_tokenize']
 
 _MAX_BUFFER_SIZE_ = 1024000  # 1MB
 
@@ -52,56 +52,53 @@ def processInput(inFD, outFD, tok):
 
 
 class ClientThread(threading.Thread):
-
     def __init__(self, ip, port, clientsocket, tok):
         threading.Thread.__init__(self)
         self.tok = tok
         self.ip = ip
         self.port = port
         self.csocket = clientsocket
-        # print("[+] New thread started for "+ip+":"+str(port))
+        # print('[+] New thread started for '+ip+':'+str(port))
 
     def run(self):
-        # print("Connection from : "+ip+":"+str(port))
+        # print('Connection from : '+ip+':'+str(port))
         data = self.csocket.recv(_MAX_BUFFER_SIZE_)
-        # print("Client(%s:%s) sent : %s"%(self.ip, str(self.port), data))
+        # print('Client(%s:%s) sent : %s'%(self.ip, str(self.port), data))
         fakeInputFile = StringIO.StringIO(data)
-        fakeOutputFile = StringIO.StringIO("")
+        fakeOutputFile = StringIO.StringIO('')
         processInput(fakeInputFile, fakeOutputFile, self.tok)
         fakeInputFile.close()
         self.csocket.send(fakeOutputFile.getvalue())
         fakeOutputFile.close()
         self.csocket.close()
 
-        # print("Client at "+self.ip+" disconnected...")
+        # print('Client at '+self.ip+' disconnected...')
 
 
-def ind_main():
-    languages = "hin urd ben asm guj mal pan tel".split()
-    languages += "tam kan ori mar nep bod kok kas".split()
-    lang_help = "select language (3 letter ISO-639 code) {%s}" % (
-        ', '.join(languages))
+def parse_args(args, indic=True):
+    if indic:
+        prog = 'Indic-Tokenizer'
+        description = 'Tokenizer for Indian Scripts'
+        languages = '''hin urd ben asm guj mal pan tel tam kan ori mar
+                    nep bod kok kas'''.split()
+        lang_help = 'select language (3 letter ISO-639 code) {%s}' % (
+                    ', '.join(languages))
+    else:
+        prog = 'Roman-Tokenizer'
+        description = 'Tokenizer for Roman Script'
     # parse command line arguments
-    parser = argparse.ArgumentParser(
-        prog="indic_tokenizer",
-        description="Tokenizer for Indian Scripts")
+    parser = argparse.ArgumentParser(prog=prog,
+                                     description=description)
     parser.add_argument('-v',
                         '--version',
-                        action="version",
-                        version="Indic-Tokenizer %s" % __version__)
+                        action='version',
+                        version='%s %s' % (prog, __version__))
     parser.add_argument('-i',
                         '--input',
                         metavar='',
-                        dest="infile",
+                        dest='infile',
                         type=str,
-                        help="<input-file>")
-    parser.add_argument('-l',
-                        '--languages',
-                        metavar='',
-                        dest="lang",
-                        choices=languages,
-                        default='hin',
-                        help=lang_help)
+                        help='<input-file>')
     parser.add_argument('-s',
                         '--split-sentences',
                         dest='split_sen',
@@ -111,9 +108,9 @@ def ind_main():
     parser.add_argument('-o',
                         '--output',
                         metavar='',
-                        dest="outfile",
+                        dest='outfile',
                         type=str,
-                        help="<output-file>")
+                        help='<output-file>')
     parser.add_argument('-d',
                         '--daemonize',
                         dest='isDaemon',
@@ -126,7 +123,21 @@ def ind_main():
                         type=int,
                         dest='daemonPort',
                         help='Specify a port number')
-    args = parser.parse_args()
+    if indic:
+        parser.add_argument('-l',
+                            '--language',
+                            metavar='',
+                            dest='lang',
+                            choices=languages,
+                            default='hin',
+                            help=lang_help)
+    args = parser.parse_args(args)
+    return args
+
+
+def ind_main():
+    # parse arguments
+    args = parse_args(sys.argv[1:])
 
     if args.infile:
         ifp = io.open(args.infile, encoding='utf-8')
@@ -149,7 +160,7 @@ def ind_main():
 
     # convert data
     if args.isDaemon and args.daemonPort:
-        host = "0.0.0.0"  # Listen on all interfaces
+        host = '0.0.0.0'  # Listen on all interfaces
         port = args.daemonPort  # Port number
 
         tcpsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -159,7 +170,7 @@ def ind_main():
 
         while True:
             tcpsock.listen(multiprocessing.cpu_count())
-            # print("nListening for incoming connections...")
+            # print('nListening for incoming connections...')
             (clientsock, (ip, port)) = tcpsock.accept()
 
             # pass clientsock to the ClientThread thread object being created
@@ -174,44 +185,8 @@ def ind_main():
 
 
 def rom_main():
-    # parse command line arguments
-    parser = argparse.ArgumentParser(
-        prog="roman_tokenizer",
-        description="Tokenizer for Roman-Scripts")
-    parser.add_argument('-v',
-                        '--version',
-                        action="version",
-                        version="Roman-Tokenizer %s" % __version__)
-    parser.add_argument('-i',
-                        '--input',
-                        metavar='',
-                        dest="infile",
-                        type=str,
-                        help="<input-file>")
-    parser.add_argument('-s',
-                        '--split-sentences',
-                        dest='split_sen',
-                        action='store_true',
-                        help='set this flag to apply'
-                             ' sentence segmentation')
-    parser.add_argument('-o',
-                        '--output',
-                        metavar='',
-                        dest="outfile",
-                        type=str,
-                        help="<output-file>")
-    parser.add_argument('-d',
-                        '--daemonize',
-                        dest='isDaemon',
-                        help='Do you want to daemonize me?',
-                        action='store_true',
-                        default=False)
-    parser.add_argument('-p',
-                        '--port',
-                        type=int,
-                        dest='daemonPort',
-                        help='Specify a port number')
-    args = parser.parse_args()
+    # parse arguments
+    args = parse_args(sys.argv[1:], indic=False)
 
     if args.infile:
         ifp = io.open(args.infile, encoding='utf-8')
@@ -234,7 +209,7 @@ def rom_main():
 
     # convert data
     if args.isDaemon and args.daemonPort:
-        host = "0.0.0.0"  # Listen on all interfaces
+        host = '0.0.0.0'  # Listen on all interfaces
         port = args.daemonPort  # Port number
 
         tcpsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -244,7 +219,7 @@ def rom_main():
 
         while True:
             tcpsock.listen(multiprocessing.cpu_count())
-            # print("nListening for incoming connections...")
+            # print('nListening for incoming connections...')
             (clientsock, (ip, port)) = tcpsock.accept()
 
             # pass clientsock to the ClientThread thread object being created
