@@ -1,14 +1,13 @@
 #!/usr/bin/env python
 # -*- coding=utf-8 -*-
 
-from __future__ import (division, unicode_literals)
+from __future__ import division, unicode_literals
 
 import re
 import os.path
 
 
 class IndicTokenizer():
-
     def __init__(self, lang='hin', split_sen=False):
         self.lang = lang
         self.split_sen = split_sen
@@ -259,17 +258,17 @@ class IndicTokenizer():
                                        '\u0B00-\u0B63\u0B70-\u0B7f', 'ori',
                                        special_ch='\u0B72-\u0B77')
         if self.urd:
-            # seperate out urdu full-stop i.e., "۔"
-            text = re.sub('([\u0600-\u06ff])\u06d4 ', r'\1 \u06d4 ', text)
-            text = re.sub(' \u06d4([\u0600-\u06ff])', r' \u06d4 \1', text)
+            # seperate out urdu full-stop (۔)
+            text = re.sub('([\u0600-\u06ff])(\u06d4 )', r'\1 \2', text)
+            text = re.sub('( \u06d4)([\u0600-\u06ff])', r'\1 \2', text)
             # seperate out Urdu comma i.e., "،" except for Urdu digits
             text = re.sub(
-                '([^0-9\u0660-\u0669\u06f0-\u06f9])\u060C',
-                r'\1 \u060C ',
+                '([^0-9\u0660-\u0669\u06f0-\u06f9])(\u060C)',
+                r'\1 \2 ',
                 text)
             text = re.sub(
-                '\u060C([^0-9\u0660-\u0669\u06f0-\u06f9])',
-                r' \u060C \1',
+                '(\u060C)([^0-9\u0660-\u0669\u06f0-\u06f9])',
+                r' \1 \2',
                 text)
             # separate out on Urdu letters followed by non-Urdu letters
             # and vice-versa
@@ -302,13 +301,13 @@ class IndicTokenizer():
                 lambda m: r'%s' % (m.group().replace('-', ' - ')),
                 text)
             text = re.sub(
-                r'(.)-([^a-zA-Z\u0617-\u061a\u0620-\u065f\u066e-\u06d3'
-                r'\u06d5\u06fa-\u06ff\ufe70-\ufeff\ufb50-\ufdff])',
+                '(.)-([^a-zA-Z\u0617-\u061a\u0620-\u065f\u066e-\u06d3'
+                '\u06d5\u06fa-\u06ff\ufe70-\ufeff\ufb50-\ufdff])',
                 r'\1 - \2',
                 text)
             text = re.sub(
-                r'([^a-zA-Z\u0617-\u061a\u0620-\u065f\u066e-\u06d3\u06d5'
-                r'\u06fa-\u06ff\ufe70-\ufeff\ufb50-\ufdff])-(.)',
+                '([^a-zA-Z\u0617-\u061a\u0620-\u065f\u066e-\u06d3\u06d5'
+                '\u06fa-\u06ff\ufe70-\ufeff\ufb50-\ufdff])-(.)',
                 r'\1 - \2',
                 text)
 
