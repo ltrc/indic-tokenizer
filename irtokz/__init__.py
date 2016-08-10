@@ -28,8 +28,8 @@ try:
 except ImportError:
     from io import StringIO
 
-from .indic_tokenize import IndicTokenizer
-from .roman_tokenize import RomanTokenizer
+from .indic_tokenizer import IndicTokenizer
+from .roman_tokenizer import RomanTokenizer
 
 __name__ = 'Indic Tokenizer'
 __author__ = 'Irshad Ahmad'
