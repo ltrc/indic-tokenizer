@@ -13,6 +13,9 @@ class RomanTokenizer():
         self.split_sen = split_sen
         file_path = os.path.abspath(__file__).rpartition('/')[0]
 
+        with open('%s/data/emoticons.txt' % file_path) as fp:
+            self.emoticons = set(fp.read().split())
+
         self.NBP = dict()
         with open('%s/data/NONBREAKING_PREFIXES' % file_path) as fp:
             for line in fp:
@@ -29,66 +32,94 @@ class RomanTokenizer():
 
     def fit(self):
         # junk characters
-        self.junk = re.compile(r'[\x00-\x1f]')
+        self.junk = re.compile('[\x00-\x1f]')
         # Latin-1 supplementary characters
-        self.latin = re.compile(r'([\xa1-\xbf\xd7\xf7])')
+        self.latin = re.compile('([\xa1-\xbf\xd7\xf7])')
         # general unicode punctituations except "’"
-        self.upunct = re.compile(r'([\u2012-\u2018\u201a-\u206f])')
+        self.upunct = re.compile('([\u2012-\u2018\u201a-\u206f])')
         # unicode mathematical operators
-        self.umathop = re.compile(r'([\u2200-\u2211\u2213-\u22ff])')
+        self.umathop = re.compile('([\u2200-\u2211\u2213-\u22ff])')
         # unicode fractions
-        self.ufrac = re.compile(r'([\u2150-\u2160])')
+        self.ufrac = re.compile('([\u2150-\u2160])')
         # unicode superscripts and subscripts
-        self.usupsub = re.compile(r'([\u2070-\u209f])')
+        self.usupsub = re.compile('([\u2070-\u209f])')
         # unicode currency symbols
-        self.ucurrency = re.compile(r'([\u20a0-\u20cf])')
+        self.ucurrency = re.compile('([\u20a0-\u20cf])')
         # all "other" ASCII special characters
         self.specascii = re.compile(r'([\\!@#$%^&*()_+={\[}\]|";:<>?`~/])')
 
         # keep multiple dots together
         self.multidot = re.compile(r'(\.\.+)([^\.])')
         # seperate "," outside
-        self.notanumc = re.compile(r'([^0-9]),')
-        self.cnotanum = re.compile(r',([^0-9])')
+        self.notanumc = re.compile('([^0-9]),')
+        self.cnotanum = re.compile(',([^0-9])')
         # split contractions right (both "'" and "’")
-        self.numcs = re.compile(r"([0-9])'s")
+        self.numcs = re.compile("([0-9])'s")
         self.aca = re.compile(
-            r"([a-zA-Z\u0080-\u024f])'([a-zA-Z\u0080-\u024f])")
+            "([a-zA-Z\u0080-\u024f])'([a-zA-Z\u0080-\u024f])")
         self.acna = re.compile(
-            r"([a-zA-Z\u0080-\u024f])'([^a-zA-Z\u0080-\u024f])")
+            "([a-zA-Z\u0080-\u024f])'([^a-zA-Z\u0080-\u024f])")
         self.nacna = re.compile(
-            r"([^a-zA-Z\u0080-\u024f])'([^a-zA-Z\u0080-\u024f])")
+            "([^a-zA-Z\u0080-\u024f])'([^a-zA-Z\u0080-\u024f])")
         self.naca = re.compile(
-            r"([^a-zA-Z0-9\u0080-\u024f])'([a-zA-Z\u0080-\u024f])")
+            "([^a-zA-Z0-9\u0080-\u024f])'([a-zA-Z\u0080-\u024f])")
 
         # split hyphens
-        self.multihyphen = re.compile(r'(-+)')
-        self.hypheninnun = re.compile(r'(-?[0-9]-+[0-9]-?){,}')
-        self.ch_hyp_noalp = re.compile(r'(.)-([^a-zA-Z])')
-        self.noalp_hyp_ch = re.compile(r'([^a-zA-Z])-(.)')
+        self.multihyphen = re.compile('(-+)')
+        self.hypheninnun = re.compile('(-?[0-9]-+[0-9]-?){,}')
+        self.ch_hyp_noalnum = re.compile('(.)-([^a-zA-Z0-9])')
+        self.noalnum_hyp_ch = re.compile('([^a-zA-Z0-9])-(.)')
         # restore multi-dots
         self.restoredots = re.compile(r'(DOT)(\1*)MULTI')
 
         # split sentences
         if self.split_sen:
-            self.splitsenr1 = re.compile(r' ([.?]) ([A-Z])')
-            self.splitsenr2 = re.compile(r' ([.?]) ([\'"\(\{\[< ]+) ([A-Z])')
+            self.splitsenr1 = re.compile(' ([.?]) ([A-Z])')
+            self.splitsenr2 = re.compile(' ([.?]) ([\'"\(\{\[< ]+) ([A-Z])')
             self.splitsenr3 = re.compile(
-                r' ([.?]) ([\'"\)\}\]> ]+) ([A-Z])')
+                ' ([.?]) ([\'"\)\}\]> ]+) ([A-Z])')
 
     def normalize_punkt(self, text):
         """replace unicode punctuation by ascii"""
         text = re.sub('[\u2010\u2043]', '-', text)  # hyphen
         text = re.sub('[\u2018\u2019]', "'", text)  # single quotes
         text = re.sub('[\u201c\u201d]', '"', text)  # double quotes
+        return text
 
+    def unmask_emos_urls(self, text):
+        text = text.split()
+        for i, token in enumerate(text):
+            if token.startswith('eMoTiCoN-'):
+                emo_id = int(token.split('-')[1])
+                text[i] = self.emos_dict[emo_id]
+            elif token.startswith('sItEuRl-'):
+                url_id = int(token.split('-')[1])
+                text[i] = self.url_dict[url_id]
+        return ' '.join(text)
+
+    def mask_emos_urls(self, text):
+        n_e, n_u = 0, 0
+        text = text.split()
+        self.url_dict = dict()
+        self.emos_dict = dict()
+        for i, token in enumerate(text):
+            if token in self.emoticons:
+                text[i] = 'eMoTiCoN-%d' % n_e
+                self.emos_dict[n_e] = token
+                n_e += 1
+            elif token.startswith('http://') or token.startswith('www.'):
+                text[i] = 'sItEuRl-%d' % n_u
+                self.url_dict[n_u] = token
+                n_u += 1
+        text = ' '.join(text)
+        text = ' %s ' % (text)
         return text
 
     def tokenize(self, text):
+        # unmask emoticons and urls
+        text = self.mask_emos_urls(text)
+        # normalize unicode punctituation
         text = self.normalize_punkt(text)
-        text = text.split()
-        text = ' '.join(text)
-        text = ' %s ' % (text)
         # seperate out on Latin-1 supplementary characters
         text = self.latin.sub(r' \1 ', text)
         # seperate out on general unicode punctituations except "’"
@@ -132,8 +163,8 @@ class RomanTokenizer():
         text = self.hypheninnun.sub(
             lambda m: r'%s' % (m.group().replace('-', ' - ')),
             text)
-        text = self.ch_hyp_noalp.sub(r'\1 - \2', text)
-        text = self.noalp_hyp_ch.sub(r'\1 - \2', text)
+        text = self.ch_hyp_noalnum.sub(r'\1 - \2', text)
+        text = self.noalnum_hyp_ch.sub(r'\1 - \2', text)
 
         # handle non-breaking prefixes
         words = text.split()
@@ -157,13 +188,13 @@ class RomanTokenizer():
                     word = dotless + ' .'
             text += "%s " % word
 
-        text = text.split()
-        text = ' '.join(text)
         # restore multi-dots
         text = self.restoredots.sub(lambda m: r'.%s' %
                                     ('.' * int((len(m.group(2)) / 3))),
                                     text)
 
+        # unmask emoticons and urls
+        text = self.unmask_emos_urls(text)
         # split sentences
         if self.split_sen:
             text = self.splitsenr1.sub(r' \1\n\2', text)
